@@ -3,29 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>🍕 La Buena Pizza</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>🐔 Punto 25 Delivery - Granja, Rebozados y Congelados</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- SPLASH -->
+<!-- SPLASH SCREEN -->
 <div id="splash">
-  <div class="sp-emoji">🍕</div>
-  <div class="sp-name">La <span>Buena</span> Pizza</div>
-  <div class="sp-tagline">Pedí. Esperá. Disfrutá.</div>
+  <div class="sp-logo-mockup">
+    <div class="sp-logo-text-1">PUNTO</div>
+    <div class="sp-logo-text-2">25</div>
+    <div class="sp-logo-text-3">Delivery</div>
+  </div>
+  <div class="sp-name">Punto <span>25</span> Delivery</div>
+  <div class="sp-tagline">Frescura y Calidad a tu Mesa</div>
   <div class="sp-loader"><div class="sp-loader-bar"></div></div>
 </div>
 
-<!-- APP -->
+<!-- APP MAIN CONTAINER -->
 <div id="app">
 
   <!-- HEADER -->
   <div class="header">
     <div class="header-inner">
       <div class="brand-block">
-        <div class="brand-greeting">🔥 Abierto · Envío a domicilio</div>
-        <div class="brand-name">La <span>Buena</span> Pizza</div>
+        <div class="brand-greeting"><span class="pulse"></span> Abierto · Pedidos en Línea</div>
+        <div class="brand-name">Punto <span>25</span> Delivery</div>
       </div>
       <button class="cart-fab" onclick="openCart()" id="cartFab">
         🛒
@@ -34,7 +38,28 @@
     </div>
     <div class="search-bar">
       <span>🔍</span>
-      <input type="text" placeholder="Buscá tu pizza, empanada..." id="searchInput" oninput="filterMenu()">
+      <input type="text" placeholder="Buscá patitas, nuggets, merluza..." id="searchInput" oninput="filterMenu()">
+    </div>
+  </div>
+
+  <!-- BRAND HERO INFO BANNER -->
+  <div class="brand-hero fade-section" id="fsHero">
+    <div class="brand-hero-logo">
+      <div class="brand-hero-logo-t1">PUNTO</div>
+      <div class="brand-hero-logo-t2">25</div>
+      <div class="brand-hero-logo-t3">Delivery</div>
+    </div>
+    <div class="brand-hero-info">
+      <div class="brand-hero-title">Punto 25 Delivery</div>
+      <div class="brand-hero-address">📍 Corrientes 664 · Barrio Norte</div>
+      <div class="brand-hero-socials">
+        <a href="https://instagram.com/punto25delivery" target="_blank" class="hero-social-tag ig">
+          📸 @punto25delivery
+        </a>
+        <a href="https://wa.me/5493813253754" target="_blank" class="hero-social-tag wa">
+          📲 3813253754
+        </a>
+      </div>
     </div>
   </div>
 
@@ -42,31 +67,28 @@
   <div class="promo-wrap fade-section" id="fsPromo">
     <div class="promo-scroll" id="promoScroll">
       <div class="promo-card p1">
-        <div class="promo-badge">⚡ OFERTA DEL DÍA</div>
-        <div class="promo-title">2x1 en Pizzas<br>los Lunes</div>
-        <div class="promo-sub">Solo hoy hasta las 22hs</div>
-        <button class="promo-cta">Ver pizzas →</button>
-        <div class="promo-emoji">🍕</div>
+        <div class="promo-badge">⚡ ENVÍO EN EL DÍA</div>
+        <div class="promo-title">Granja y Congelados<br>a Domicilio</div>
+        <div class="promo-sub">Delivery rápido en Barrio Norte</div>
+        <div class="promo-emoji">🛵</div>
       </div>
       <div class="promo-card p2">
-        <div class="promo-badge">🎉 COMBO ESPECIAL</div>
-        <div class="promo-title">12 Empanadas<br>+ Gaseosa</div>
-        <div class="promo-sub">Ahorrá $800 en el combo</div>
-        <button class="promo-cta">Ver combo →</button>
-        <div class="promo-emoji">🥟</div>
+        <div class="promo-badge">🍗 OFERTA DEL MES</div>
+        <div class="promo-title">Los Rebozados<br>Más Ricos</div>
+        <div class="promo-sub">¡Llevando por Kilo ahorrás siempre!</div>
+        <div class="promo-emoji">🍗</div>
       </div>
       <div class="promo-card p3">
-        <div class="promo-badge">🚀 ENVÍO GRATIS</div>
-        <div class="promo-title">En pedidos<br>+$4.000</div>
-        <div class="promo-sub">Todo el barrio con envío gratis</div>
-        <button class="promo-cta">Pedí ahora →</button>
-        <div class="promo-emoji">🛵</div>
+        <div class="promo-badge">🐟 MAR Y RÍO</div>
+        <div class="promo-title">Filet de Merluza<br>Fresco y Despinado</div>
+        <div class="promo-sub">Crocantes, rabas y medallones listos</div>
+        <div class="promo-emoji">🐟</div>
       </div>
     </div>
     <div class="promo-dots" id="promoDots">
-      <div class="dot active"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
+      <div class="dot active" onclick="scrollToPromo(0)"></div>
+      <div class="dot" onclick="scrollToPromo(1)"></div>
+      <div class="dot" onclick="scrollToPromo(2)"></div>
     </div>
   </div>
 
@@ -74,45 +96,58 @@
   <div class="cats-wrap fade-section" id="fsCats">
     <div class="cats-scroll" id="catScroll">
       <div class="cat-pill active" onclick="filterCat('todos')" data-cat="todos"><span>🍽️</span>Todos</div>
-      <div class="cat-pill" onclick="filterCat('pizzas')" data-cat="pizzas"><span>🍕</span>Pizzas</div>
-      <div class="cat-pill" onclick="filterCat('empanadas')" data-cat="empanadas"><span>🥟</span>Empanadas</div>
-      <div class="cat-pill" onclick="filterCat('bebidas')" data-cat="bebidas"><span>🥤</span>Bebidas</div>
-      <div class="cat-pill" onclick="filterCat('postres')" data-cat="postres"><span>🍰</span>Postres</div>
+      <div class="cat-pill" onclick="filterCat('pollo-rebozado')" data-cat="pollo-rebozado"><span>🍗</span>Rebozados Pollo</div>
+      <div class="cat-pill" onclick="filterCat('pollo-granja')" data-cat="pollo-granja"><span>🐔</span>Granja y Cortes</div>
+      <div class="cat-pill" onclick="filterCat('pescados-mariscos')" data-cat="pescados-mariscos"><span>🐟</span>Mar y Río</div>
+      <div class="cat-pill" onclick="filterCat('veggie-soja')" data-cat="veggie-soja"><span>🌿</span>Veggie & Soja</div>
+      <div class="cat-pill" onclick="filterCat('bocados-papas')" data-cat="bocados-papas"><span>🍟</span>Bocados & Papas</div>
+      <div class="cat-pill" onclick="filterCat('almacen-huevos')" data-cat="almacen-huevos"><span>🥚</span>Almacén</div>
     </div>
   </div>
-
-  <!-- FEATURED -->
-  <div class="featured-wrap fade-section" id="fsFeat" style="display:none">
-    <div class="section-label">⭐ Los más pedidos</div>
-    <div class="featured-scroll" id="featScroll"></div>
+  <!-- MENU LIST -->
+  <div class="menu-wrap fade-section" id="fsMenu">
+    <div class="section-label" id="menuTitle">🍽️ Catálogo Completo</div>
+    <div class="menu-list" id="menuList"></div>
   </div>
 
-  <!-- MENU -->
-  <div class="menu-wrap fade-section" id="fsMenu">
-    <div class="section-label" id="menuTitle">🍽️ Menú completo</div>
-    <div class="menu-list" id="menuList"></div>
+  <!-- FOOTER -->
+  <div class="app-footer fade-section" id="fsFooter">
+    <div class="footer-logo">Punto 25 Delivery</div>
+    <div class="footer-text">Llevamos los mejores rebozados, productos de granja, pescados y congelados directamente a tu cocina con la frescura que mereces.</div>
+    <div class="footer-address">
+      <span>📍 Nuestra Dirección</span>
+      Corrientes 664, Barrio Norte<br>San Miguel de Tucumán
+    </div>
+    <div class="footer-buttons">
+      <a href="https://wa.me/5493813253754" target="_blank" class="footer-btn wa">
+        💬 WhatsApp 1
+      </a>
+      <a href="https://instagram.com/punto25delivery" target="_blank" class="footer-btn ig">
+        📸 Instagram
+      </a>
+    </div>
   </div>
 
   <div style="height:20px"></div>
 </div>
 
-<!-- BOTTOM BAR -->
+<!-- BOTTOM STICKY BAR -->
 <div class="bottom-bar">
   <button class="order-btn" id="orderBtn" onclick="openCart()">
     <div class="order-btn-left">
       <div class="order-btn-count" id="btnCount">0</div>
-      <span>Ver mi pedido</span>
+      <span>Ver mi Pedido</span>
     </div>
     <div class="order-btn-total" id="btnTotal">$0</div>
   </button>
 </div>
 
-<!-- CART PANEL -->
+<!-- CART PANEL PANEL -->
 <div class="panel-overlay" id="panelOverlay" onclick="closeCart()"></div>
 <div class="panel" id="cartPanel">
   <div class="panel-handle"></div>
   <div class="panel-title">
-    Tu pedido 🛒
+    Tu Pedido 🛒
     <button class="panel-close" onclick="closeCart()">✕</button>
   </div>
 
@@ -124,25 +159,43 @@
   <div id="cartContent"></div>
 
   <div id="cartForm" style="display:none">
+    
+    <!-- WHATSAPP NUMBER SELECTOR -->
     <div class="form-section">
-      <label class="form-label">Tu nombre</label>
+      <label class="form-label">¿A qué número enviar el pedido?</label>
+      <div class="wa-channel-grid">
+        <div class="wa-channel-card active" id="waCard0" onclick="selectWaChannel(0)">
+          <span class="c-icon">📲</span>
+          <span class="c-name">Celular Principal</span>
+          <span class="c-phone">381 325-3754</span>
+        </div>
+        <div class="wa-channel-card" id="waCard1" onclick="selectWaChannel(1)">
+          <span class="c-icon">📲</span>
+          <span class="c-name">Celular Alternativo</span>
+          <span class="c-phone">381 398-0410</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <label class="form-label">Tu Nombre</label>
       <input class="form-input" type="text" id="fNombre" placeholder="Juan García">
     </div>
     <div class="form-section">
-      <label class="form-label">Teléfono</label>
-      <input class="form-input" type="tel" id="fTel" placeholder="351 123-4567">
+      <label class="form-label">Teléfono de Contacto</label>
+      <input class="form-input" type="tel" id="fTel" placeholder="381 123-4567">
     </div>
     <div class="form-section" id="addressSection">
-      <label class="form-label">Dirección de entrega</label>
-      <input class="form-input" type="text" id="fDir" placeholder="Av. Siempre Viva 742, piso 3">
+      <label class="form-label">Dirección de Entrega</label>
+      <input class="form-input" type="text" id="fDir" placeholder="Corrientes 500, piso 1 dpto A">
     </div>
     <div class="form-section">
-      <label class="form-label">Notas (opcional)</label>
-      <textarea class="notes-input" id="fNota" placeholder="Sin cebolla, extra queso, tocar timbre..."></textarea>
+      <label class="form-label">Notas o Aclaraciones (opcional)</label>
+      <textarea class="notes-input" id="fNota" placeholder="Aclaraciones de envío o detalles de peso especial..."></textarea>
     </div>
     <button class="wa-btn" onclick="sendWhatsApp()">
       <span class="wa-icon">📲</span>
-      Enviar pedido por WhatsApp
+      Enviar Pedido por WhatsApp
     </button>
   </div>
 </div>
@@ -150,7 +203,7 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- SCRIPTS: data primero, luego app -->
+<!-- SCRIPTS: data.js first, then app.js -->
 <script src="data.js"></script>
 <script src="app.js"></script>
 
