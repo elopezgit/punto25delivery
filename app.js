@@ -75,6 +75,273 @@ function scrollToPromo(idx) {
   }
 }
 
+// ─── LOCAL STORAGE PERSISTENCE ───
+function saveClientData() {
+  const nombre = document.getElementById('fNombre') ? document.getElementById('fNombre').value.trim() : '';
+  const tel = document.getElementById('fTel') ? document.getElementById('fTel').value.trim() : '';
+  const dir = document.getElementById('fDir') ? document.getElementById('fDir').value.trim() : '';
+  
+  localStorage.setItem('p25_nombre', nombre);
+  localStorage.setItem('p25_tel', tel);
+  localStorage.setItem('p25_dir', dir);
+  localStorage.setItem('p25_delivery', deliveryMode);
+}
+
+function loadClientData() {
+  const nombre = localStorage.getItem('p25_nombre') || '';
+  const tel = localStorage.getItem('p25_tel') || '';
+  const dir = localStorage.getItem('p25_dir') || '';
+  const delivery = localStorage.getItem('p25_delivery') || 'delivery';
+  
+  if (document.getElementById('fNombre')) document.getElementById('fNombre').value = nombre;
+  if (document.getElementById('fTel')) document.getElementById('fTel').value = tel;
+  if (document.getElementById('fDir')) document.getElementById('fDir').value = dir;
+  
+  setDelivery(delivery);
+}
+
+function saveLastOrder() {
+  localStorage.setItem('p25_last_cart', JSON.stringify(cart));
+}
+
+function checkLastOrderHistory() {
+  const lastCartStr = localStorage.getItem('p25_last_cart');
+  const banner = document.getElementById('historyBanner');
+  if (lastCartStr && banner) {
+    try {
+      const lastCart = JSON.parse(lastCartStr);
+      const keys = Object.keys(lastCart);
+      if (keys.length > 0) {
+        let descItems = [];
+        keys.slice(0, 3).forEach(key => {
+          const [idStr, opt] = key.split('-');
+          const item = MENU.find(i => i.id === parseInt(idStr));
+          if (item) {
+            const optText = item.unitType === 'peso' ? (opt === '0.5kg' ? '½ Kg' : '1 Kg') : 'Unid.';
+            descItems.push(`${item.name} (${optText})`);
+          }
+        });
+        if (keys.length > 3) descItems.push('y más...');
+        
+        const descEl = document.getElementById('historyOrderDesc');
+        if (descEl) descEl.textContent = descItems.join(', ');
+        banner.style.display = 'flex';
+      } else {
+        banner.style.display = 'none';
+      }
+    } catch (e) {
+      banner.style.display = 'none';
+    }
+  } else if (banner) {
+    banner.style.display = 'none';
+  }
+}
+
+function loadLastOrder(event) {
+  if (event) event.stopPropagation();
+  const lastCartStr = localStorage.getItem('p25_last_cart');
+  if (lastCartStr) {
+    try {
+      cart = JSON.parse(lastCartStr);
+      Object.keys(cart).forEach(key => {
+        const [idStr, opt] = key.split('-');
+        if (opt === '1kg' || opt === '0.5kg') {
+          selectedWeights[parseInt(idStr)] = opt;
+        }
+      });
+      renderMenu(currentCat === 'todos' ? MENU : MENU.filter(i => i.cat === currentCat));
+      updateCartBadge();
+      showToast('🛒 ¡Pedido anterior cargado con éxito!');
+      document.getElementById('historyBanner').style.display = 'none';
+      openCart();
+    } catch (e) {
+      showToast('⚠️ Error al cargar el historial');
+    }
+  }
+}
+
+// ─── FREE SHIPPING TRACKER ───
+function updateFreeShippingTracker(total) {
+  const container = document.getElementById('freeShippingContainer');
+  if (!container) return;
+
+  if (deliveryMode === 'takeaway') {
+    container.style.display = 'none';
+    return;
+  }
+
+  container.style.display = 'block';
+  const limit = 12000;
+  const percent = Math.min(100, (total / limit) * 100);
+  
+  const fill = document.getElementById('freeShippingFill');
+  const msg = document.getElementById('freeShippingMsg');
+  const suggestions = document.getElementById('freeShippingSuggestions');
+  const grid = document.getElementById('fsSugGrid');
+
+  if (fill) fill.style.width = percent + '%';
+
+  if (total >= limit) {
+    if (msg) msg.innerHTML = '¡Felicidades! 🎉 ¡Conseguiste <strong>Envío Gratis</strong>!';
+    if (suggestions) suggestions.style.display = 'none';
+  } else {
+    const remaining = limit - total;
+    if (msg) msg.innerHTML = `¡Estás a <strong>${formatPrice(remaining)}</strong> de conseguir <strong>Envío Gratis</strong>!`;
+    if (suggestions) suggestions.style.display = 'flex';
+    
+    // Sugerencias de productos complementarios baratos
+    const sugItems = [
+      { id: 45, name: 'Huevos Campo', price: 2200, emoji: '🥚' },
+      { id: 43, name: 'Papas McCain', price: 3200, emoji: '🍟' },
+      { id: 35, name: 'Tequeños', price: 3450, emoji: '🫔' },
+      { id: 34, name: 'Bastones Mozzarella', price: 3650, emoji: '🧀' }
+    ];
+
+    if (grid) {
+      grid.innerHTML = sugItems.map(s => `
+        <div class="fs-sug-card" onclick="addQuickSuggestion(${s.id})">
+          <span style="font-size:14px">${s.emoji}</span>
+          <div style="display:flex;flex-direction:column;align-items:flex-start">
+            <span class="fs-sug-name">${s.name}</span>
+            <span class="fs-sug-price">${formatPrice(s.price)}</span>
+          </div>
+          <button class="fs-sug-add">+</button>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+function addQuickSuggestion(id) {
+  const item = MENU.find(i => i.id === id);
+  if (!item) return;
+
+  const opt = item.unitType === 'peso' ? '1kg' : 'unidad';
+  const cartKey = `${id}-${opt}`;
+  
+  cart[cartKey] = (cart[cartKey] || 0) + 1;
+  updateAll(id);
+  showToast(`💡 ${item.name} agregado`);
+}
+
+// ─── KILO OPTIMIZER ───
+function checkKiloOptimizer() {
+  const alertBox = document.getElementById('optimizerAlert');
+  if (!alertBox) return;
+
+  // Buscar el primer producto pesable que tenga al menos 2 unidades de medio kilo
+  const optimizable = MENU.find(item => {
+    if (item.unitType !== 'peso') return false;
+    const qtyHalf = cart[`${item.id}-0.5kg`] || 0;
+    return qtyHalf >= 2;
+  });
+
+  if (optimizable) {
+    const qtyHalf = cart[`${optimizable.id}-0.5kg`] || 0;
+    const costHalf = qtyHalf * optimizable.priceHalf;
+    const optimizedKilos = Math.floor(qtyHalf / 2);
+    const remainingHalves = qtyHalf % 2;
+    const costOptimized = (optimizedKilos * optimizable.price) + (remainingHalves * optimizable.priceHalf);
+    const saving = costHalf - costOptimized;
+
+    if (saving > 0) {
+      alertBox.innerHTML = `
+        <div class="opt-header">
+          <span class="opt-icon">💡</span>
+          <span class="opt-title">¡Sugerencia de Ahorro!</span>
+        </div>
+        <div class="opt-body">
+          Tenés <strong>${qtyHalf} unidades de ½ Kg</strong> de <strong>${optimizable.name}</strong> en tu carrito. Si lo unificás a Kilos completos, ¡te ahorrás <strong>${formatPrice(saving)}</strong>!
+        </div>
+        <div class="opt-footer">
+          <button class="opt-btn" onclick="optimizeWeight(${optimizable.id})">Optimizar y Ahorrar 💰</button>
+        </div>
+      `;
+      alertBox.style.display = 'flex';
+      return;
+    }
+  }
+  
+  alertBox.style.display = 'none';
+}
+
+function optimizeWeight(id) {
+  const keyHalf = `${id}-0.5kg`;
+  const keyKilo = `${id}-1kg`;
+  const qtyHalf = cart[keyHalf] || 0;
+  
+  if (qtyHalf >= 2) {
+    const optimizedKilos = Math.floor(qtyHalf / 2);
+    const remainingHalves = qtyHalf % 2;
+    
+    cart[keyKilo] = (cart[keyKilo] || 0) + optimizedKilos;
+    if (remainingHalves > 0) {
+      cart[keyHalf] = remainingHalves;
+    } else {
+      delete cart[keyHalf];
+    }
+    updateAll(id);
+    showToast('⚡ ¡Pedido optimizado y unificado!');
+  }
+}
+
+// ─── HORARIOS DE APERTURA REALTIME ───
+function checkStoreSchedule() {
+  const now = new Date();
+  const day = now.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+  const hour = now.getHours();
+  const min = now.getMinutes();
+  const timeVal = hour * 100 + min; // Formato hhmm (ej. 1430)
+  
+  let isOpen = false;
+  let statusText = '';
+  
+  if (day >= 1 && day <= 6) { // Lunes a Sábado
+    const morningOpen = 930;
+    const morningClose = 1330;
+    const eveningOpen = 1730;
+    const eveningClose = 2130;
+    
+    if ((timeVal >= morningOpen && timeVal <= morningClose) || 
+        (timeVal >= eveningOpen && timeVal <= eveningClose)) {
+      isOpen = true;
+      statusText = 'Abierto ahora · Entrega estimada 30-50 min';
+    } else {
+      if (timeVal < morningOpen) {
+        statusText = 'Cerrado ahora · Abrimos a las 09:30hs';
+      } else if (timeVal > morningClose && timeVal < eveningOpen) {
+        statusText = 'Cerrado ahora · Abrimos a las 17:30hs';
+      } else {
+        statusText = 'Cerrado ahora · Abrimos mañana a las 09:30hs';
+      }
+    }
+  } else { // Domingo cerrado
+    statusText = 'Cerrado hoy Domingo · Abrimos Lunes 09:30hs';
+  }
+  
+  // Actualizar indicador en UI
+  const greeting = document.getElementById('storeStatusGreeting');
+  const indicator = greeting ? greeting.querySelector('.status-indicator-dot') : null;
+  const label = document.getElementById('storeStatusText');
+  
+  if (greeting && indicator && label) {
+    indicator.className = 'status-indicator-dot ' + (isOpen ? 'open' : 'closed');
+    label.textContent = statusText;
+  }
+  
+  // Modificar botón de envío en el panel
+  const waBtn = document.querySelector('.wa-btn');
+  if (waBtn) {
+    if (isOpen) {
+      waBtn.innerHTML = '<span class="wa-icon">📲</span> Enviar Pedido por WhatsApp';
+    } else {
+      waBtn.innerHTML = '<span class="wa-icon">📅</span> Agendar Pedido para la Apertura';
+    }
+  }
+  
+  return isOpen;
+}
+
 // ─── RENDER MENU ─────────────────────────────────────────────────
 function renderMenu(items) {
   const list = document.getElementById('menuList');
@@ -341,6 +608,10 @@ function renderCartPanel() {
         <div class="cart-empty-text">Tu carrito está vacío.<br>¡Agregá algo rico del catálogo!</div>
       </div>`;
     form.style.display = 'none';
+    
+    // Ocultar barras de envío gratis y optimizador si está vacío
+    if (document.getElementById('freeShippingContainer')) document.getElementById('freeShippingContainer').style.display = 'none';
+    if (document.getElementById('optimizerAlert')) document.getElementById('optimizerAlert').style.display = 'none';
     return;
   }
 
@@ -390,6 +661,10 @@ function renderCartPanel() {
   content.innerHTML = rows;
   form.style.display = 'block';
   document.getElementById('addressSection').style.display = deliveryMode === 'delivery' ? 'block' : 'none';
+
+  // Actualizar los widgets interactivos de la cabecera del carrito
+  updateFreeShippingTracker(total);
+  checkKiloOptimizer();
 }
 
 // ─── DELIVERY MODE ────────────────────────────────────────────────
@@ -454,8 +729,15 @@ function sendWhatsApp() {
   
   msg += `\n📍 _Enviado desde el catálogo web de Punto 25_`;
 
+  // Guardar datos del cliente de forma permanente
+  saveClientData();
+  saveLastOrder();
+
   window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_blank');
   showToast(`📲 Pedido ${orderId} redirigiendo...`);
+  
+  // Refrescar el historial de pedidos anteriores
+  setTimeout(checkLastOrderHistory, 1000);
 }
 
 // ─── TOAST NOTIFICATION ──────────────────────────────────────────
@@ -516,6 +798,12 @@ function init() {
   renderMenu(MENU);
   initPromoDots();
   initScrollObserver();
+  loadClientData();
+  checkLastOrderHistory();
+  checkStoreSchedule();
+  
+  // Chequeo automático de horario cada 30 segundos
+  setInterval(checkStoreSchedule, 30000);
 }
 
 // Iniciar aplicación

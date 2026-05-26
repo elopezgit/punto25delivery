@@ -28,7 +28,10 @@
   <div class="header">
     <div class="header-inner">
       <div class="brand-block">
-        <div class="brand-greeting"><span class="pulse"></span> Abierto · Pedidos en Línea</div>
+        <div class="brand-greeting" id="storeStatusGreeting">
+          <span class="status-indicator-dot open"></span>
+          <span id="storeStatusText">Abierto · Pedidos en Línea</span>
+        </div>
         <div class="brand-name">Punto <span>25</span> Delivery</div>
       </div>
       <button class="cart-fab" onclick="openCart()" id="cartFab">
@@ -61,6 +64,18 @@
         </a>
       </div>
     </div>
+  </div>
+
+  <!-- HISTORY BANNER (REPETIR ÚLTIMO PEDIDO) -->
+  <div class="history-banner fade-section" id="historyBanner" style="display: none;">
+    <div class="hb-content">
+      <span class="hb-icon">♻️</span>
+      <div class="hb-info">
+        <div class="hb-title">¿Querés repetir tu última compra?</div>
+        <div class="hb-desc" id="historyOrderDesc">Cargando datos...</div>
+      </div>
+    </div>
+    <button class="hb-btn" onclick="loadLastOrder(event)">Repetir 🛒</button>
   </div>
 
   <!-- PROMOS -->
@@ -155,6 +170,24 @@
     <button class="dtoggle-btn active" id="dBtn1" onclick="setDelivery('delivery')">🛵 Delivery</button>
     <button class="dtoggle-btn" id="dBtn2" onclick="setDelivery('takeaway')">🏃 Retiro</button>
   </div>
+
+  <!-- FREE SHIPPING PROGRESS BAR & KILO OPTIMIZER -->
+  <div class="free-shipping-container" id="freeShippingContainer">
+    <div class="fs-text-wrap">
+      <span class="fs-status-msg" id="freeShippingMsg">¡Cargando meta de envío gratis!</span>
+    </div>
+    <div class="fs-progress-bg">
+      <div class="fs-progress-fill" id="freeShippingFill" style="width: 0%;">
+        <span class="fs-progress-icon">🛵</span>
+      </div>
+    </div>
+    <div class="fs-suggestions" id="freeShippingSuggestions">
+      <span class="fs-sug-label">💡 Sumá al carrito para no pagar envío:</span>
+      <div class="fs-sug-grid" id="fsSugGrid"></div>
+    </div>
+  </div>
+
+  <div class="optimizer-alert" id="optimizerAlert" style="display: none;"></div>
 
   <div id="cartContent"></div>
 

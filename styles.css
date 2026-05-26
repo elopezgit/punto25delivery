@@ -685,3 +685,130 @@ body {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ─── STATUS INDICATOR DOT ─── */
+.status-indicator-dot {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+  margin-right: 4px;
+}
+.status-indicator-dot.open {
+  background: #25D366;
+  animation: livePulse 1.8s infinite;
+}
+.status-indicator-dot.closed {
+  background: #ff4b2b;
+}
+
+/* ─── HISTORY BANNER (REPETIR ÚLTIMO PEDIDO) ─── */
+.history-banner {
+  margin: 12px 18px 4px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  box-shadow: var(--shadow-sm);
+  animation: slideDown 0.3s ease;
+}
+.hb-content { display: flex; gap: 10px; align-items: center; }
+.hb-icon { font-size: 22px; }
+.hb-info { display: flex; flex-direction: column; }
+.hb-title { font-size: 13px; font-weight: 700; color: var(--brand-dark); }
+.hb-desc { font-size: 11px; color: var(--text-light); }
+.hb-btn {
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  color: white; border: none; border-radius: 8px; padding: 6px 12px;
+  font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 3px 8px rgba(13, 161, 245, 0.15);
+}
+.hb-btn:active { transform: scale(0.95); }
+
+/* ─── FREE SHIPPING TRACKER ─── */
+.free-shipping-container {
+  background: var(--surface);
+  padding: 14px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.fs-text-wrap {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.fs-status-msg {
+  font-size: 12px; font-weight: 700; color: var(--brand-dark);
+}
+.fs-progress-bg {
+  height: 8px; background: rgba(15, 23, 42, 0.05);
+  border-radius: 4px; position: relative; overflow: visible;
+  margin-bottom: 12px;
+}
+.fs-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--brand), var(--brand2));
+  border-radius: 4px; position: relative;
+  transition: width 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+}
+.fs-progress-icon {
+  position: absolute; right: -8px; top: -8px;
+  font-size: 14px;
+}
+.fs-suggestions {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.fs-sug-label {
+  font-size: 10px; font-weight: 700; color: var(--text-light); text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.fs-sug-grid {
+  display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+  padding: 4px 0;
+}
+.fs-sug-grid::-webkit-scrollbar { display: none; }
+.fs-sug-card {
+  flex-shrink: 0; background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 6px 10px; border-radius: 10px;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: var(--shadow-sm); cursor: pointer; transition: all 0.2s;
+}
+.fs-sug-card:active { transform: scale(0.95); }
+.fs-sug-name { font-size: 11px; font-weight: 700; color: var(--text); }
+.fs-sug-price { font-size: 11px; font-weight: 700; color: var(--brand); }
+.fs-sug-add {
+  font-size: 12px; font-weight: 800; color: var(--brand2);
+  background: var(--surface); border: none; width: 18px; height: 18px;
+  border-radius: 4px; display: flex; align-items: center; justify-content: center;
+}
+
+/* ─── KILO OPTIMIZER ALERT BOX ─── */
+.optimizer-alert {
+  background: rgba(255, 214, 0, 0.08);
+  border: 1.5px solid rgba(255, 214, 0, 0.3);
+  padding: 12px 14px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  display: flex; flex-direction: column; gap: 8px;
+  animation: bounceIn 0.4s ease;
+}
+@keyframes bounceIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  70% { transform: scale(1.03); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.opt-header { display: flex; gap: 6px; align-items: center; }
+.opt-icon { font-size: 18px; }
+.opt-title { font-size: 12px; font-weight: 700; color: #856404; }
+.opt-body { font-size: 11px; color: #856404; font-weight: 500; line-height: 1.4; }
+.opt-footer { display: flex; justify-content: flex-end; }
+.opt-btn {
+  background: #ffd600; color: var(--brand-dark);
+  border: none; border-radius: 8px; padding: 6px 12px;
+  font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(255, 214, 0, 0.25);
+}
+.opt-btn:active { transform: scale(0.95); }
