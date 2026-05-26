@@ -652,9 +652,13 @@ function renderCartPanel() {
   });
   rows += '</div>';
 
-  const envio = deliveryMode === 'delivery' ? 1000 : 0; // Envío estimado de $1.000 ARS en Tucumán
+  const isFreeShipping = total >= 12000;
+  const envio = (deliveryMode === 'delivery' && !isFreeShipping) ? 1000 : 0;
   rows += `<div class="cart-subtotal"><span>Subtotal Productos</span><span>${formatPrice(total)}</span></div>`;
-  rows += `<div class="cart-subtotal"><span>Envío ${deliveryMode === 'delivery' ? '🛵 (Barrio Norte)' : '🏃 Gratis (retiro local)'}</span><span>${envio ? formatPrice(envio) : '$0'}</span></div>`;
+  rows += `<div class="cart-subtotal">
+    <span>Envío ${deliveryMode === 'delivery' ? '🛵 (Barrio Norte)' : '🏃 Gratis (retiro local)'}</span>
+    <span>${envio ? formatPrice(envio) : (deliveryMode === 'delivery' && isFreeShipping) ? '¡Gratis! 🎉' : '$0'}</span>
+  </div>`;
   rows += `<div class="cart-total"><span>Total Final</span><span>${formatPrice(total + envio)}</span></div>`;
   rows += '<div style="height:10px"></div>';
 
@@ -686,7 +690,8 @@ function sendWhatsApp() {
   if (deliveryMode === 'delivery' && !dir) { showToast('⚠️ Ingresá tu dirección de entrega'); return; }
 
   const { total } = getTotals();
-  const envio = deliveryMode === 'delivery' ? 1000 : 0;
+  const isFreeShipping = total >= 12000;
+  const envio = (deliveryMode === 'delivery' && !isFreeShipping) ? 1000 : 0;
   const waNumber = '549' + WA_NUMBERS[selectedWaIdx]; // Código país + número
   const orderId = generateOrderId();
 
@@ -719,7 +724,7 @@ function sendWhatsApp() {
   });
 
   if (deliveryMode === 'delivery') {
-    msg += `\n🛵 *Envío:* ${formatPrice(envio)}\n`;
+    msg += `\n🛵 *Envío:* ${envio ? formatPrice(envio) : '¡Gratis! 🎉'}\n`;
   }
   msg += `💰 *TOTAL FINAL: ${formatPrice(total + envio)}*\n`;
   
