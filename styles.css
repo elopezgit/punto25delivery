@@ -812,3 +812,173 @@ body {
   box-shadow: 0 2px 6px rgba(255, 214, 0, 0.25);
 }
 .opt-btn:active { transform: scale(0.95); }
+
+/* ─── DETALLE DEL PRODUCTO: MODAL GOURMET ─── */
+.product-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(2, 35, 64, 0.4); /* Azul profundo sutil con opacidad */
+  z-index: 1000; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.product-modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.product-modal {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 430px;
+  background: var(--surface);
+  border-radius: 32px 32px 0 0;
+  z-index: 1100;
+  overflow-y: auto;
+  max-height: 90vh;
+  box-shadow: 0 -15px 50px rgba(2, 35, 64, 0.18);
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex; flex-direction: column;
+}
+.product-modal.open { transform: translateX(-50%) translateY(0); }
+
+/* Botón de cerrar de diseño flotante */
+.pm-close-btn {
+  position: absolute; top: 16px; right: 16px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--border);
+  color: var(--brand-dark); font-size: 16px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm); z-index: 10;
+  transition: all 0.2s;
+}
+.pm-close-btn:active { transform: scale(0.9) rotate(90deg); }
+
+/* Cabecera visual del modal (Imagen o emoji) */
+.pm-image-wrap {
+  width: 100%; height: 200px; position: relative;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
+}
+.pm-image-wrap img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.pm-img-skeleton {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: pmShimmer 1.5s infinite;
+}
+@keyframes pmShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.pm-img-fallback {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle, var(--brand) 0%, var(--brand2) 100%);
+}
+.pm-fallback-emoji {
+  font-size: 80px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.25));
+  animation: emojiFloat 3s ease-in-out infinite;
+}
+@keyframes emojiFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Contenido interno */
+.pm-content-wrap {
+  padding: 24px; display: flex; flex-direction: column; gap: 16px;
+}
+.pm-header { display: flex; flex-direction: column; gap: 4px; }
+.pm-category {
+  font-size: 10px; font-weight: 800; color: var(--brand);
+  letter-spacing: 2px; text-transform: uppercase;
+}
+.pm-title {
+  font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 22px;
+  color: var(--brand-dark); line-height: 1.2;
+}
+
+.pm-rating-row { display: flex; align-items: center; gap: 6px; }
+.pm-stars { color: var(--gold); font-size: 14px; letter-spacing: 1px; }
+.pm-rating-value { font-size: 13px; font-weight: 700; color: var(--text-light); }
+
+.pm-desc {
+  font-size: 13.5px; color: var(--text); line-height: 1.5; font-weight: 500;
+  background: #f8fafc; padding: 12px 16px; border-radius: 14px;
+  border-left: 3.5px solid var(--brand);
+}
+
+.pm-info-section {
+  display: flex; flex-direction: column; gap: 6px;
+  border-top: 1px dashed var(--border); padding-top: 14px;
+}
+.pm-section-title { font-size: 12.5px; font-weight: 800; color: var(--brand2); text-transform: uppercase; letter-spacing: 0.5px; }
+.pm-ingredients, .pm-prep { font-size: 12px; color: var(--text-light); line-height: 1.5; font-weight: 500; }
+
+.pm-price-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--border); padding: 12px 18px; border-radius: 16px;
+  margin-top: 6px;
+}
+.pm-price-label { font-size: 13px; font-weight: 700; color: var(--text-light); }
+.pm-price-value { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 20px; color: var(--brand-dark); }
+.pm-price-unit { font-size: 12px; font-weight: 600; color: var(--text-light); margin-left: 2px;}
+
+.pm-actions {
+  display: flex; flex-direction: column; gap: 10px; margin-top: 4px;
+}
+
+/* Selector de peso dentro del modal */
+.pm-weight-selector-modal {
+  display: flex; gap: 8px;
+  background: rgba(7, 64, 111, 0.05);
+  padding: 4px; border-radius: 12px;
+}
+.pm-weight-pill-modal {
+  flex: 1; text-align: center; padding: 10px;
+  font-size: 12px; font-weight: 700; border-radius: 9px;
+  border: none; background: transparent; color: var(--text-light);
+  cursor: pointer; transition: all 0.2s;
+}
+.pm-weight-pill-modal.active {
+  background: var(--brand2); color: white;
+  box-shadow: 0 4px 10px rgba(7, 64, 111, 0.2);
+}
+
+/* Botón grande de agregar al carrito en el modal */
+.pm-add-cart-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  border: none; border-radius: 14px; color: white;
+  font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 14px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 6px 16px rgba(13, 161, 245, 0.25);
+  transition: all 0.2s;
+}
+.pm-add-cart-btn:active { transform: scale(0.97); }
+
+/* Controles de cantidad en el modal */
+.pm-qty-controls-modal {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #f8fafc; border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 6px;
+}
+.pm-qty-btn-modal {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--brand2); font-size: 20px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm); transition: all 0.15s;
+}
+.pm-qty-btn-modal:active { transform: scale(0.9); background: var(--bg); }
+.pm-qty-num-modal {
+  font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 14px;
+  color: var(--brand2);
+}
+
+/* Botón de volver al catálogo */
+.pm-back-btn {
+  width: 100%; padding: 12px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 14px; color: var(--text-light);
+  font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 13px;
+  cursor: pointer; text-align: center;
+  transition: all 0.2s; margin-top: 6px;
+}
+.pm-back-btn:active { transform: scale(0.97); background: var(--bg); color: var(--brand2); }

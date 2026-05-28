@@ -414,7 +414,244 @@ function renderMenu(items) {
 }
 
 function handleCardClick(id) {
-  // Opcional: acción al tocar la tarjeta, en este caso es amigable sumarlo o cambiar foco
+  openProductModal(id);
+}
+
+// ─── PRODUCT DETAIL MODAL ACTIONS ───
+function openProductModal(id) {
+  const item = MENU.find(i => i.id === id);
+  if (!item) return;
+
+  const overlay = document.getElementById('productModalOverlay');
+  const modal = document.getElementById('productModal');
+  if (overlay && modal) {
+    overlay.classList.add('open');
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  const labels = {
+    'pollo-rebozado': 'Rebozados de Pollo',
+    'pollo-granja': 'Granja y Cortes',
+    'pescados-mariscos': 'Mar y Río (Pescados)',
+    'veggie-soja': 'Veggie & Soja',
+    'bocados-papas': 'Bocados & Papas',
+    'almacen-huevos': 'Almacén y Huevos'
+  };
+  
+  const categoryEl = document.getElementById('pmCategory');
+  const titleEl = document.getElementById('pmTitle');
+  const ratingEl = document.getElementById('pmRating');
+  const descEl = document.getElementById('pmDesc');
+  const ingSection = document.getElementById('pmIngredientsSection');
+  const ingEl = document.getElementById('pmIngredients');
+  const prepSection = document.getElementById('pmPrepSection');
+  const prepEl = document.getElementById('pmPrep');
+  const imgWrap = document.getElementById('pmImageWrap');
+
+  if (categoryEl) categoryEl.textContent = (labels[item.cat] || 'Menú').toUpperCase();
+  if (titleEl) titleEl.textContent = item.name;
+  if (ratingEl) ratingEl.textContent = (item.rating || 4.8).toFixed(1);
+  if (descEl) descEl.textContent = item.desc;
+
+  if (ingSection && ingEl) {
+    if (item.ingredients) {
+      ingEl.textContent = item.ingredients;
+      ingSection.style.display = 'block';
+    } else {
+      ingSection.style.display = 'none';
+    }
+  }
+
+  if (prepSection && prepEl) {
+    if (item.prepDesc) {
+      let prepText = item.prepDesc;
+      if (item.prepTime) {
+        prepText += ` (Tiempo estimado: ${item.prepTime})`;
+      }
+      prepEl.textContent = prepText;
+      prepSection.style.display = 'block';
+    } else {
+      prepSection.style.display = 'none';
+    }
+  }
+
+  if (imgWrap) {
+    imgWrap.innerHTML = '';
+    const hasImage = item.img && item.img.trim() !== '';
+    if (hasImage) {
+      imgWrap.innerHTML = `
+        <div class="pm-img-skeleton"></div>
+        <img src="${item.img}" alt="${item.name}" onload="this.previousElementSibling.remove()" onerror="this.previousElementSibling.remove(); this.style.display='none'; this.nextElementSibling.style.opacity='1';">
+        <div class="pm-img-fallback" style="opacity:0">
+          <span class="pm-fallback-emoji">${item.emoji}</span>
+        </div>
+      `;
+    } else {
+      imgWrap.innerHTML = `
+        <div class="pm-img-fallback show">
+          <span class="pm-fallback-emoji">${item.emoji}</span>
+        </div>
+      `;
+    }
+  }
+
+  const priceVal = document.getElementById('pmPrice');
+  const actionsWrap = document.getElementById('pmActions');
+
+  if (priceVal && actionsWrap) {
+    if (item.unitType === 'peso') {
+      const activeWeight = selectedWeights[item.id] || '1kg';
+      
+      const updateModalPriceAndActions = (weightOpt) => {
+        selectedWeights[item.id] = weightOpt;
+        const currentPrice = weightOpt === '0.5kg' ? item.priceHalf : item.price;
+        const unitText = weightOpt === '0.5kg' ? '½ Kg' : 'Kg';
+        priceVal.innerHTML = `${formatPrice(currentPrice)} <span class="pm-price-unit">x ${unitText}</span>`;
+        
+        const cartKey = `${item.id}-${weightOpt}`;
+        const qty = cart[cartKey] || 0;
+        
+        let actionHTML = '';
+        if (qty > 0) {
+          actionHTML = `
+            <div class="pm-weight-selector-modal">
+              <button class="pm-weight-pill-modal ${weightOpt === '0.5kg' ? 'active' : ''}" id="pmWeightHalfBtn">½ Kg</button>
+              <button class="pm-weight-pill-modal ${weightOpt === '1kg' ? 'active' : ''}" id="pmWeightKiloBtn">1 Kg</button>
+            </div>
+            <div class="pm-qty-controls-modal">
+              <button class="pm-qty-btn-modal" id="pmMinusBtn">−</button>
+              <span class="pm-qty-num-modal">${qty} en el carrito</span>
+              <button class="pm-qty-btn-modal" id="pmPlusBtn">+</button>
+            </div>
+          `;
+        } else {
+          actionHTML = `
+            <div class="pm-weight-selector-modal">
+              <button class="pm-weight-pill-modal ${weightOpt === '0.5kg' ? 'active' : ''}" id="pmWeightHalfBtn">½ Kg</button>
+              <button class="pm-weight-pill-modal ${weightOpt === '1kg' ? 'active' : ''}" id="pmWeightKiloBtn">1 Kg</button>
+            </div>
+            <button class="pm-add-cart-btn" id="pmAddBtn">
+              <span>🛒</span> Agregar al Carrito (${unitText})
+            </button>
+          `;
+        }
+        actionsWrap.innerHTML = actionHTML;
+        
+        const halfBtn = document.getElementById('pmWeightHalfBtn');
+        const kiloBtn = document.getElementById('pmWeightKiloBtn');
+        if (halfBtn) halfBtn.onclick = () => updateModalPriceAndActions('0.5kg');
+        if (kiloBtn) kiloBtn.onclick = () => updateModalPriceAndActions('1kg');
+        
+        const addBtn = document.getElementById('pmAddBtn');
+        if (addBtn) {
+          addBtn.onclick = () => {
+            addItemFromModal(item.id, weightOpt);
+            updateModalPriceAndActions(weightOpt);
+          };
+        }
+        
+        const minusBtn = document.getElementById('pmMinusBtn');
+        const plusBtn = document.getElementById('pmPlusBtn');
+        if (minusBtn) {
+          minusBtn.onclick = () => {
+            changeQtyFromModal(item.id, weightOpt, -1);
+            updateModalPriceAndActions(weightOpt);
+          };
+        }
+        if (plusBtn) {
+          plusBtn.onclick = () => {
+            changeQtyFromModal(item.id, weightOpt, 1);
+            updateModalPriceAndActions(weightOpt);
+          };
+        }
+      };
+      
+      updateModalPriceAndActions(activeWeight);
+      
+    } else {
+      let unitSuffix = 'Unidad';
+      if (item.cat === 'almacen-huevos' && item.id === 45) unitSuffix = 'Docena';
+      if (item.cat === 'almacen-huevos' && item.id === 46) unitSuffix = 'Bandeja';
+      
+      const updateModalPriceAndActionsUnit = () => {
+        priceVal.innerHTML = `${formatPrice(item.price)} <span class="pm-price-unit">x ${unitSuffix}</span>`;
+        const cartKey = `${item.id}-unidad`;
+        const qty = cart[cartKey] || 0;
+        
+        let actionHTML = '';
+        if (qty > 0) {
+          actionHTML = `
+            <div class="pm-qty-controls-modal">
+              <button class="pm-qty-btn-modal" id="pmMinusBtn">−</button>
+              <span class="pm-qty-num-modal">${qty} en el carrito</span>
+              <button class="pm-qty-btn-modal" id="pmPlusBtn">+</button>
+            </div>
+          `;
+        } else {
+          actionHTML = `
+            <button class="pm-add-cart-btn" id="pmAddBtn">
+              <span>🛒</span> Agregar al Carrito
+            </button>
+          `;
+        }
+        actionsWrap.innerHTML = actionHTML;
+        
+        const addBtn = document.getElementById('pmAddBtn');
+        if (addBtn) {
+          addBtn.onclick = () => {
+            addItemFromModal(item.id, 'unidad');
+            updateModalPriceAndActionsUnit();
+          };
+        }
+        
+        const minusBtn = document.getElementById('pmMinusBtn');
+        const plusBtn = document.getElementById('pmPlusBtn');
+        if (minusBtn) {
+          minusBtn.onclick = () => {
+            changeQtyFromModal(item.id, 'unidad', -1);
+            updateModalPriceAndActionsUnit();
+          };
+        }
+        if (plusBtn) {
+          plusBtn.onclick = () => {
+            changeQtyFromModal(item.id, 'unidad', 1);
+            updateModalPriceAndActionsUnit();
+          };
+        }
+      };
+      
+      updateModalPriceAndActionsUnit();
+    }
+  }
+}
+
+function closeProductModal() {
+  const overlay = document.getElementById('productModalOverlay');
+  const modal = document.getElementById('productModal');
+  if (overlay) overlay.classList.remove('open');
+  if (modal) modal.classList.remove('open');
+  document.body.style.overflow = '';
+  
+  const activeItems = currentCat === 'todos' ? MENU : MENU.filter(i => i.cat === currentCat);
+  renderMenu(activeItems);
+}
+
+function addItemFromModal(id, opt) {
+  const cartKey = `${id}-${opt}`;
+  cart[cartKey] = (cart[cartKey] || 0) + 1;
+  updateAll(id);
+  spawnParticle(id);
+  const item = MENU.find(i => i.id === id);
+  const unitText = item.unitType === 'peso' ? (opt === '0.5kg' ? ' x ½ Kg' : ' x 1 Kg') : '';
+  showToast(`🍗 ${item.name}${unitText} agregado`);
+}
+
+function changeQtyFromModal(id, opt, delta) {
+  const cartKey = `${id}-${opt}`;
+  cart[cartKey] = Math.max(0, (cart[cartKey] || 0) + delta);
+  if (cart[cartKey] === 0) delete cart[cartKey];
+  updateAll(id);
 }
 
 // Cambiar la opción de peso de un producto
@@ -800,7 +1037,7 @@ function initScrollObserver() {
 
 // ─── INIT ─────────────────────────────────────────────────────────
 function init() {
-  renderMenu(MENU);
+  filterCat('todos');
   initPromoDots();
   initScrollObserver();
   loadClientData();

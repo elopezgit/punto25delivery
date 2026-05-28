@@ -233,6 +233,45 @@
   </div>
 </div>
 
+<!-- PRODUCT DETAIL MODAL -->
+<div class="product-modal-overlay" id="productModalOverlay" onclick="closeProductModal()"></div>
+<div class="product-modal" id="productModal">
+  <button class="pm-close-btn" onclick="closeProductModal()">✕</button>
+  <div class="pm-image-wrap" id="pmImageWrap"></div>
+  <div class="pm-content-wrap">
+    <div class="pm-header">
+      <span class="pm-category" id="pmCategory">CATEGORÍA</span>
+      <h2 class="pm-title" id="pmTitle">Nombre del Producto</h2>
+    </div>
+    <div class="pm-rating-row">
+      <span class="pm-stars">★★★★★</span>
+      <span class="pm-rating-value" id="pmRating">5.0</span>
+    </div>
+    <p class="pm-desc" id="pmDesc">Descripción detallada del producto...</p>
+    
+    <div class="pm-info-section" id="pmIngredientsSection">
+      <span class="pm-section-title">🌿 Ingredientes Selección</span>
+      <p class="pm-ingredients" id="pmIngredients">Ingredientes...</p>
+    </div>
+    
+    <div class="pm-info-section" id="pmPrepSection">
+      <span class="pm-section-title">⏱️ Preparación & Conservación</span>
+      <p class="pm-prep" id="pmPrep">Preparación...</p>
+    </div>
+    
+    <div class="pm-price-row">
+      <span class="pm-price-label">Precio Unitario</span>
+      <span class="pm-price-value" id="pmPrice">$--</span>
+    </div>
+
+    <div class="pm-actions" id="pmActions">
+      <!-- Botones de compra rápida inyectados por JS -->
+    </div>
+    
+    <button class="pm-back-btn" onclick="closeProductModal()">Volver al Catálogo 🐔</button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
