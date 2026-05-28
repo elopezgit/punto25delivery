@@ -76,22 +76,41 @@ function scrollToPromo(idx) {
 }
 
 // ─── LOCAL STORAGE PERSISTENCE ───
+// Helper seguro para localStorage (evita caídas en navegadores que bloquean cookies de terceros o en el protocolo file://)
+const safeStorage = {
+  getItem(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      console.warn("localStorage.getItem bloqueado por el navegador:", e);
+      return null;
+    }
+  },
+  setItem(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      console.warn("localStorage.setItem bloqueado por el navegador:", e);
+    }
+  }
+};
+
 function saveClientData() {
   const nombre = document.getElementById('fNombre') ? document.getElementById('fNombre').value.trim() : '';
   const tel = document.getElementById('fTel') ? document.getElementById('fTel').value.trim() : '';
   const dir = document.getElementById('fDir') ? document.getElementById('fDir').value.trim() : '';
   
-  localStorage.setItem('p25_nombre', nombre);
-  localStorage.setItem('p25_tel', tel);
-  localStorage.setItem('p25_dir', dir);
-  localStorage.setItem('p25_delivery', deliveryMode);
+  safeStorage.setItem('p25_nombre', nombre);
+  safeStorage.setItem('p25_tel', tel);
+  safeStorage.setItem('p25_dir', dir);
+  safeStorage.setItem('p25_delivery', deliveryMode);
 }
 
 function loadClientData() {
-  const nombre = localStorage.getItem('p25_nombre') || '';
-  const tel = localStorage.getItem('p25_tel') || '';
-  const dir = localStorage.getItem('p25_dir') || '';
-  const delivery = localStorage.getItem('p25_delivery') || 'delivery';
+  const nombre = safeStorage.getItem('p25_nombre') || '';
+  const tel = safeStorage.getItem('p25_tel') || '';
+  const dir = safeStorage.getItem('p25_dir') || '';
+  const delivery = safeStorage.getItem('p25_delivery') || 'delivery';
   
   if (document.getElementById('fNombre')) document.getElementById('fNombre').value = nombre;
   if (document.getElementById('fTel')) document.getElementById('fTel').value = tel;
@@ -101,11 +120,11 @@ function loadClientData() {
 }
 
 function saveLastOrder() {
-  localStorage.setItem('p25_last_cart', JSON.stringify(cart));
+  safeStorage.setItem('p25_last_cart', JSON.stringify(cart));
 }
 
 function checkLastOrderHistory() {
-  const lastCartStr = localStorage.getItem('p25_last_cart');
+  const lastCartStr = safeStorage.getItem('p25_last_cart');
   const banner = document.getElementById('historyBanner');
   if (lastCartStr && banner) {
     try {
@@ -139,7 +158,7 @@ function checkLastOrderHistory() {
 
 function loadLastOrder(event) {
   if (event) event.stopPropagation();
-  const lastCartStr = localStorage.getItem('p25_last_cart');
+  const lastCartStr = safeStorage.getItem('p25_last_cart');
   if (lastCartStr) {
     try {
       cart = JSON.parse(lastCartStr);
@@ -1048,5 +1067,9 @@ function init() {
   setInterval(checkStoreSchedule, 30000);
 }
 
-// Iniciar aplicación
-init();
+// Iniciar aplicación de forma segura cuando el DOM esté listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
