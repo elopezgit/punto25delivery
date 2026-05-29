@@ -773,6 +773,10 @@ function changeQtyByKey(key, delta) {
 }
 
 function updateAll(changedId) {
+  // Feedback acústico pop al mutar el carrito de forma interactiva
+  if (changedId !== 0) {
+    playPop();
+  }
   // Re-renderizamos los controles de la tarjeta afectada en la vista principal
   const item = MENU.find(i => i.id === changedId);
   if (item) {
@@ -1183,6 +1187,10 @@ function openReceiptModal(orderId, customerName, phone, isDelivery, itemsList, s
     overlay.classList.add('open');
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
+    
+    // Lanzar audio de éxito de caja registradora y confeti de festejo
+    playChime();
+    startCelebration();
   }
 }
 
@@ -1192,6 +1200,9 @@ function closeReceiptModal() {
   if (overlay) overlay.classList.remove('open');
   if (modal) modal.classList.remove('open');
   document.body.style.overflow = '';
+  
+  // Detener y limpiar la simulación de confeti festivo si sigue corriendo
+  stopCelebration();
   
   // Limpiar y resetear el carrito tras el éxito comercial
   cart = {};
@@ -1384,5 +1395,217 @@ function initTheme() {
       document.body.classList.remove('dark');
       if (toggleBtn) toggleBtn.textContent = '🌙';
     }
+  }
+}
+
+// ─── AUDIO-FEEDBACK NATIVO (Web Audio API Synthesizers) ───
+let audioCtxInstance = null;
+function getAudioContext() {
+  if (!audioCtxInstance) {
+    audioCtxInstance = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtxInstance.state === 'suspended') {
+    audioCtxInstance.resume();
+  }
+  return audioCtxInstance;
+}
+
+function playPop() {
+  try {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = 'sine';
+    // Descenso de frecuencia para simular un "pop" orgánico y limpio
+    osc.frequency.setValueAtTime(160, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.08);
+    
+    gain.gain.setValueAtTime(0.35, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 0.09);
+  } catch (e) {
+    console.warn("AudioContext bloqueado o no soportado por el navegador:", e);
+  }
+}
+
+function playChime() {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    
+    // 1. Sonido metálico inicial (burst de ruido bandpass) de las monedas
+    const bufferSize = ctx.sampleRate * 0.05; // 50ms
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.value = 1200;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.12, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    
+    // 2. Tono principal de la campana metálica de la caja
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(987.77, now); // Nota B5 (si5)
+    gain1.gain.setValueAtTime(0.25, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    
+    // 3. Armónico cristalino secundario (Campana aguda)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(1318.51, now); // Nota E6 (mi6)
+    gain2.gain.setValueAtTime(0.12, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    
+    noise.start(now);
+    osc1.start(now);
+    osc2.start(now);
+    
+    noise.stop(now + 0.06);
+    osc1.stop(now + 0.9);
+    osc2.stop(now + 0.7);
+  } catch (e) {
+    console.warn("Error en la síntesis del chime de la caja registradora:", e);
+  }
+}
+
+// ─── ESTALLIDO DE CONFETI Y EMOJIS (Celebration FX) ───
+let celebrationActive = false;
+let celebrationAnimationId = null;
+
+function startCelebration() {
+  const canvas = document.getElementById('celebrationCanvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  canvas.style.display = 'block';
+
+  // Redimensionar el canvas a pantalla completa adaptándose a cualquier dispositivo
+  const resizeCanvas = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  };
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  const particles = [];
+  const emojis = ['🍗', '🍟', '🥚', '🐔', '⚡', '🎉', '🌟', '🥓'];
+  const colors = ['#0da1f5', '#07406f', '#ffd600', '#25D366', '#ff4b2b', '#e6683c', '#9b59b6'];
+
+  // Crear 120 partículas con físicas dinámicas individuales
+  const particleCount = 130;
+  for (let i = 0; i < particleCount; i++) {
+    const isEmoji = Math.random() < 0.28; // 28% de emojis del catálogo, 72% confeti de colores
+    particles.push({
+      x: canvas.width / 2 + (Math.random() * 80 - 40),
+      y: canvas.height * 0.75, // Lanzar desde la zona baja-centro de la pantalla (cerca del modal)
+      vx: (Math.random() * 12 - 6) * (1 + Math.random() * 0.5),
+      vy: -(Math.random() * 16 + 12), // Fuerte impulso inicial vertical hacia arriba
+      gravity: 0.38,
+      friction: 0.975,
+      size: isEmoji ? Math.random() * 12 + 18 : Math.random() * 6 + 6,
+      rotation: Math.random() * Math.PI * 2,
+      rotationSpeed: (Math.random() * 0.18 - 0.09),
+      color: colors[Math.floor(Math.random() * colors.length)],
+      emoji: isEmoji ? emojis[Math.floor(Math.random() * emojis.length)] : null,
+      opacity: 1,
+      fadeSpeed: Math.random() * 0.006 + 0.005
+    });
+  }
+
+  celebrationActive = true;
+  let startTime = Date.now();
+
+  function animate() {
+    if (!celebrationActive) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let activeParticles = 0;
+
+    particles.forEach(p => {
+      if (p.opacity <= 0) return;
+
+      activeParticles++;
+
+      // Actualizar variables físicas
+      p.vx *= p.friction;
+      p.vy += p.gravity;
+      p.vy *= p.friction;
+      
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rotation += p.rotationSpeed;
+      
+      // Empezar a desvanecer progresivamente tras 1.2 segundos de vuelo
+      if (Date.now() - startTime > 1200) {
+        p.opacity -= p.fadeSpeed;
+      }
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.opacity);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+
+      if (p.emoji) {
+        ctx.font = `${p.size}px Outfit, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.emoji, 0, 0);
+      } else {
+        // Dibujar tiras de confeti rectangulares
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size, -p.size / 2, p.size * 2, p.size);
+      }
+
+      ctx.restore();
+    });
+
+    // Detener animación si se agotan las partículas o si expira el tiempo límite
+    if (activeParticles === 0 || Date.now() - startTime > 4500) {
+      stopCelebration();
+    } else {
+      celebrationAnimationId = requestAnimationFrame(animate);
+    }
+  }
+
+  if (celebrationAnimationId) {
+    cancelAnimationFrame(celebrationAnimationId);
+  }
+  celebrationAnimationId = requestAnimationFrame(animate);
+}
+
+function stopCelebration() {
+  celebrationActive = false;
+  if (celebrationAnimationId) {
+    cancelAnimationFrame(celebrationAnimationId);
+    celebrationAnimationId = null;
+  }
+  const canvas = document.getElementById('celebrationCanvas');
+  if (canvas) {
+    canvas.style.display = 'none';
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 }
