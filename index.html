@@ -34,15 +34,20 @@
         </div>
         <div class="brand-name">Punto <span>25</span> Delivery</div>
       </div>
-      <button class="cart-fab" onclick="openCart()" id="cartFab">
-        🛒
-        <div class="cart-count" id="cartCount">0</div>
-      </button>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Cambiar Tema">🌙</button>
+        <button class="cart-fab" onclick="openCart()" id="cartFab">
+          🛒
+          <div class="cart-count" id="cartCount">0</div>
+        </button>
+      </div>
     </div>
     <div class="search-bar">
       <span>🔍</span>
       <input type="text" placeholder="Buscá patitas, nuggets, merluza..." id="searchInput" oninput="filterMenu()">
+      <button class="voice-btn" id="voiceBtn" onclick="startVoiceSearch(event)" title="Buscar por voz">🎙️</button>
     </div>
+    <div class="search-suggestions" id="searchSuggestions" style="display:none"></div>
   </div>
 
   <!-- BRAND HERO INFO BANNER -->
@@ -170,6 +175,13 @@
   </div>
   <!-- MENU LIST -->
   <div class="menu-wrap" id="fsMenu">
+    <!-- QUICK TAG FILTERS (Filtros por Tags Estilo PedidoYa) -->
+    <div class="quick-tags-wrap" id="quickTags">
+      <button class="tag-pill" onclick="filterMenuByTag('popular')" data-tag="popular">🔥 Populares</button>
+      <button class="tag-pill" onclick="filterMenuByTag('relleno')" data-tag="relleno">🧀 Rellenos</button>
+      <button class="tag-pill" onclick="filterMenuByTag('saludable')" data-tag="saludable">🥗 Saludable</button>
+      <button class="tag-pill" onclick="filterMenuByTag('niños')" data-tag="niños">👶 Infantil</button>
+    </div>
     <div class="section-label" id="menuTitle">🍽️ Catálogo Completo</div>
     <div class="menu-list" id="menuList"></div>
   </div>
@@ -318,6 +330,45 @@
     </div>
     
     <button class="pm-back-btn" onclick="closeProductModal()">Volver al Catálogo 🐔</button>
+  </div>
+</div>
+
+<!-- DIGITAL RECEIPT MODAL (Recibo Físico Simulador) -->
+<div class="receipt-overlay" id="receiptOverlay" onclick="closeReceiptModal()"></div>
+<div class="receipt-modal" id="receiptModal">
+  <div class="receipt-paper" id="receiptPaper">
+    <div class="receipt-header">
+      <div class="receipt-logo">PUNTO 25</div>
+      <div class="receipt-subtitle">Granja, Rebozados y Congelados</div>
+      <div class="receipt-address">Corrientes 664, Barrio Norte</div>
+      <div class="receipt-divider"></div>
+    </div>
+    <div class="receipt-meta">
+      <div class="receipt-meta-row"><span>ID PEDIDO:</span><span id="recId">#25-XXXX</span></div>
+      <div class="receipt-meta-row"><span>FECHA:</span><span id="recDate">--/--/----</span></div>
+      <div class="receipt-meta-row"><span>CLIENTE:</span><span id="recName">--</span></div>
+      <div class="receipt-meta-row"><span>TELÉFONO:</span><span id="recTel">--</span></div>
+      <div class="receipt-meta-row"><span>MODALIDAD:</span><span id="recDelivery">--</span></div>
+      <div class="receipt-divider"></div>
+    </div>
+    <div class="receipt-items-container" id="recItems">
+      <!-- Inyectado por JS -->
+    </div>
+    <div class="receipt-divider"></div>
+    <div class="receipt-totals">
+      <div class="receipt-total-row"><span>Subtotal Productos:</span><span id="recSubtotal">$0</span></div>
+      <div class="receipt-total-row"><span>Costo Envío:</span><span id="recShipping">$0</span></div>
+      <div class="receipt-total-row main"><span>TOTAL DE COMPRA:</span><span id="recTotal">$0</span></div>
+    </div>
+    <div class="receipt-divider"></div>
+    <div class="receipt-barcode">
+      <div class="barcode-lines">|||||| ||||| ||| ||||||| | ||||| | ||</div>
+      <div class="barcode-text">*** GRACIAS POR SU COMPRA ***</div>
+    </div>
+  </div>
+  <div class="receipt-actions">
+    <button class="receipt-btn download" onclick="downloadReceipt()">📥 Descargar Recibo</button>
+    <button class="receipt-btn close" onclick="closeReceiptModal()">Volver al Catálogo 🐔</button>
   </div>
 </div>
 

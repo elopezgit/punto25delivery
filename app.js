@@ -1003,6 +1003,9 @@ function sendWhatsApp() {
     : `🏃 *Modalidad:* Retiro en local (Corrientes 664)\n`;
   msg += `\n🛒 *Detalle del Pedido:*\n`;
 
+  // Compilar los items para la generación del ticket digital
+  const receiptItems = [];
+
   Object.entries(cart).forEach(([key, qty]) => {
     const [idStr, opt] = key.split('-');
     const item = MENU.find(i => i.id === parseInt(idStr));
@@ -1020,6 +1023,14 @@ function sendWhatsApp() {
       }
 
       msg += `  • ${qty}x ${item.emoji} ${item.name}${optLabel} — ${formatPrice(price * qty)}\n`;
+      
+      // Agregar al arreglo del recibo
+      receiptItems.push({
+        name: item.name,
+        qty: qty,
+        price: price,
+        optText: optLabel
+      });
     }
   });
 
@@ -1038,8 +1049,18 @@ function sendWhatsApp() {
   saveClientData();
   saveLastOrder();
 
+  // Abrir WhatsApp en pestaña nueva
   window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_blank');
-  showToast(`📲 Pedido ${orderId} redirigiendo...`);
+  
+  // Cerrar el panel del carrito
+  closeCart();
+  
+  // Abrir la ventana del ticket de compra digital interactivo en pantalla
+  setTimeout(() => {
+    openReceiptModal(orderId, nombre, tel, deliveryMode === 'delivery', receiptItems, total, envio);
+  }, 400);
+  
+  showToast(`📲 Pedido ${orderId} enviado a WhatsApp`);
   
   // Refrescar el historial de pedidos anteriores
   setTimeout(checkLastOrderHistory, 1000);
@@ -1103,6 +1124,8 @@ function init() {
   filterCat('todos');
   initPromoDots();
   initScrollObserver();
+  initSpotlightSearch();
+  initTheme();
   loadClientData();
   checkLastOrderHistory();
   checkStoreSchedule();
@@ -1116,4 +1139,293 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
   init();
+}
+
+// ─── EXTRA UTILITIES & ELITE FEATURES ───
+
+// 1. BÚSQUEDA INTELIGENTE POR VOZ (Speech-to-Text)
+let recognition;
+function startVoiceSearch(event) {
+  if (event) event.stopPropagation();
+  
+  const voiceBtn = document.getElementById('voiceBtn');
+  const searchInput = document.getElementById('searchInput');
+  
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast("🎙️ Tu navegador no soporta búsqueda por voz");
+    return;
+  }
+  
+  if (!recognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'es-AR';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    recognition.onstart = () => {
+      voiceBtn.classList.add('recording');
+      showToast("🎙️ Escuchando... Hablá ahora");
+    };
+    
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      searchInput.value = transcript;
+      filterMenu(); // Buscar automáticamente
+      showToast(`🔍 Dictado: "${transcript}"`);
+    };
+    
+    recognition.onerror = (e) => {
+      console.error("Error en reconocimiento de voz:", e);
+      showToast("🎙️ No se detectó audio. Reintentá");
+      voiceBtn.classList.remove('recording');
+    };
+    
+    recognition.onend = () => {
+      voiceBtn.classList.remove('recording');
+    };
+  }
+  
+  try {
+    recognition.start();
+  } catch (e) {
+    recognition.stop();
+  }
+}
+
+// 2. RECIBO DE COMPRA DIGITAL INTERACTIVO (Ticket)
+function openReceiptModal(orderId, customerName, phone, isDelivery, itemsList, subtotal, shippingCost) {
+  const overlay = document.getElementById('receiptOverlay');
+  const modal = document.getElementById('receiptModal');
+  
+  document.getElementById('recId').textContent = orderId;
+  
+  const now = new Date();
+  const dateString = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) + 'hs';
+  document.getElementById('recDate').textContent = dateString;
+  
+  document.getElementById('recName').textContent = customerName;
+  document.getElementById('recTel').textContent = phone;
+  document.getElementById('recDelivery').textContent = isDelivery ? '🛵 Delivery a Domicilio' : '🏃 Retiro en Local';
+  
+  // Renderizar ítems como un recibo físico real
+  const itemsEl = document.getElementById('recItems');
+  itemsEl.innerHTML = itemsList.map(item => `
+    <div class="receipt-item-row">
+      <span class="receipt-item-name">${item.qty}x ${item.name}${item.optText}</span>
+      <span>${formatPrice(item.price * item.qty)}</span>
+    </div>
+  `).join('');
+  
+  document.getElementById('recSubtotal').textContent = formatPrice(subtotal);
+  document.getElementById('recShipping').textContent = formatPrice(shippingCost);
+  document.getElementById('recTotal').textContent = formatPrice(subtotal + shippingCost);
+  
+  if (overlay && modal) {
+    overlay.classList.add('open');
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeReceiptModal() {
+  const overlay = document.getElementById('receiptOverlay');
+  const modal = document.getElementById('receiptModal');
+  if (overlay) overlay.classList.remove('open');
+  if (modal) modal.classList.remove('open');
+  document.body.style.overflow = '';
+  
+  // Limpiar y resetear el carrito tras el éxito comercial
+  cart = {};
+  selectedWeights = {};
+  
+  // Salvar cambios limpios
+  const nombre = document.getElementById('fNombre') ? document.getElementById('fNombre').value.trim() : '';
+  const tel = document.getElementById('fTel') ? document.getElementById('fTel').value.trim() : '';
+  const dir = document.getElementById('fDir') ? document.getElementById('fDir').value.trim() : '';
+  safeStorage.setItem('p25_nombre', nombre);
+  safeStorage.setItem('p25_tel', tel);
+  safeStorage.setItem('p25_dir', dir);
+  
+  updateAll(0);
+  filterCat('todos');
+}
+
+function downloadReceipt() {
+  const orderId = document.getElementById('recId').textContent;
+  const date = document.getElementById('recDate').textContent;
+  const name = document.getElementById('recName').textContent;
+  const tel = document.getElementById('recTel').textContent;
+  const mode = document.getElementById('recDelivery').textContent;
+  
+  let ticketText = `========================================\n`;
+  ticketText += `             PUNTO 25 DELIVERY          \n`;
+  ticketText += `       Granja, Rebozados y Congelados   \n`;
+  ticketText += `        Corrientes 664, Barrio Norte    \n`;
+  ticketText += `========================================\n\n`;
+  ticketText += `ID PEDIDO: ${orderId}\n`;
+  ticketText += `FECHA:     ${date}\n`;
+  ticketText += `CLIENTE:   ${name}\n`;
+  ticketText += `TELEFONO:  ${tel}\n`;
+  ticketText += `MODO:      ${mode}\n`;
+  ticketText += `----------------------------------------\n`;
+  ticketText += `DETALLE DEL PEDIDO:\n`;
+  
+  const rows = document.querySelectorAll('.receipt-item-row');
+  rows.forEach(row => {
+    const name = row.querySelector('.receipt-item-name').textContent;
+    const price = row.querySelector('span:last-child').textContent;
+    const spacesCount = Math.max(1, 40 - name.length - price.length);
+    ticketText += `${name}${" ".repeat(spacesCount)}${price}\n`;
+  });
+  
+  ticketText += `----------------------------------------\n`;
+  ticketText += `Subtotal:  ${document.getElementById('recSubtotal').textContent}\n`;
+  ticketText += `Envío:     ${document.getElementById('recShipping').textContent}\n`;
+  ticketText += `TOTAL:     ${document.getElementById('recTotal').textContent}\n`;
+  ticketText += `========================================\n`;
+  ticketText += `       *** GRACIAS POR SU COMPRA ***    \n`;
+  ticketText += `========================================\n`;
+  
+  const blob = new Blob([ticketText], { type: 'text/plain;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `ticket-${orderId}.txt`;
+  link.click();
+  showToast("📥 Recibo de texto descargado");
+}
+
+// 3. PANEL DE BÚSQUEDA INTELIGENTE (Spotlight Autocomplete)
+function initSpotlightSearch() {
+  const searchInput = document.getElementById('searchInput');
+  const suggestionsEl = document.getElementById('searchSuggestions');
+  
+  if (!searchInput || !suggestionsEl) return;
+  
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.toLowerCase().trim();
+    if (!q) {
+      suggestionsEl.style.display = 'none';
+      return;
+    }
+    
+    const matches = MENU.filter(item => 
+      item.name.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q)
+    ).slice(0, 5);
+    
+    if (matches.length > 0) {
+      suggestionsEl.innerHTML = matches.map(item => `
+        <div class="suggestion-item" onclick="selectSpotlightSuggestion(${item.id})">
+          <span class="sug-emoji">${item.emoji}</span>
+          <span class="sug-name">${item.name}</span>
+          <span class="sug-price">${formatPrice(item.price)}</span>
+        </div>
+      `).join('');
+      suggestionsEl.style.display = 'flex';
+    } else {
+      suggestionsEl.style.display = 'none';
+    }
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !suggestionsEl.contains(e.target)) {
+      suggestionsEl.style.display = 'none';
+    }
+  });
+}
+
+function selectSpotlightSuggestion(id) {
+  const suggestionsEl = document.getElementById('searchSuggestions');
+  if (suggestionsEl) suggestionsEl.style.display = 'none';
+  
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) searchInput.value = '';
+  
+  openProductModal(id);
+}
+
+// 4. FILTROS RÁPIDOS POR TAGS
+let activeTag = null;
+function filterMenuByTag(tag) {
+  // Desactivar categorías y marcas activas para enfocar la búsqueda por tags
+  document.querySelectorAll('.cat-card').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.brand-card').forEach(b => b.classList.remove('active'));
+  
+  const tagPills = document.querySelectorAll('.quick-tags-wrap .tag-pill');
+  
+  if (activeTag === tag) {
+    activeTag = null;
+    tagPills.forEach(p => p.classList.remove('active'));
+    filterCat('todos');
+    return;
+  }
+  
+  activeTag = tag;
+  tagPills.forEach(p => {
+    p.classList.toggle('active', p.dataset.tag === tag);
+  });
+  
+  let items = [];
+  let titleText = '';
+  
+  if (tag === 'popular') {
+    items = MENU.filter(i => i.tags.includes('popular') || i.hot || i.rating >= 4.9);
+    titleText = '🔥 Los Más Vendidos del Catálogo';
+  } else if (tag === 'relleno') {
+    items = MENU.filter(i => i.tags.includes('relleno') || i.name.toLowerCase().includes('rellen') || i.name.toLowerCase().includes('mozzarella'));
+    titleText = '🧀 Exquisiteces con Queso & Rellenos';
+  } else if (tag === 'saludable') {
+    items = MENU.filter(i => i.tags.includes('saludable') || i.cat === 'veggie-soja' || i.tags.includes('vegetariana'));
+    titleText = '🥗 Línea Fit & Saludable';
+  } else if (tag === 'niños') {
+    items = MENU.filter(i => i.tags.includes('niños') || i.name.toLowerCase().includes('patitas') || i.name.toLowerCase().includes('nugget'));
+    titleText = '👶 Menú Infantil Favorito';
+  }
+  
+  document.getElementById('menuTitle').textContent = titleText;
+  renderMenu(items);
+  
+  const menuTitleEl = document.getElementById('menuTitle');
+  if (menuTitleEl) {
+    menuTitleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// 5. MODO OSCURO INTELIGENTE Y AUTOMÁTICO
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  safeStorage.setItem('p25_theme', isDark ? 'dark' : 'light');
+  
+  const toggleBtn = document.getElementById('themeToggleBtn');
+  if (toggleBtn) {
+    toggleBtn.textContent = isDark ? '☀️' : '🌙';
+  }
+  showToast(isDark ? "🌙 Modo Noche Activado" : "☀️ Modo Día Activado");
+}
+
+function initTheme() {
+  const savedTheme = safeStorage.getItem('p25_theme');
+  const toggleBtn = document.getElementById('themeToggleBtn');
+  
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark');
+    if (toggleBtn) toggleBtn.textContent = '☀️';
+  } else if (savedTheme === 'light') {
+    document.body.classList.remove('dark');
+    if (toggleBtn) toggleBtn.textContent = '🌙';
+  } else {
+    // Si no hay preferencia del cliente, activar modo oscuro inteligente automáticamente según horario (19:30 a 07:00hs)
+    const now = new Date();
+    const hour = now.getHours();
+    const isNightTime = hour >= 19 || hour < 7;
+    
+    if (isNightTime) {
+      document.body.classList.add('dark');
+      if (toggleBtn) toggleBtn.textContent = '☀️';
+      console.log("Modo oscuro activado automáticamente de forma inteligente por horario nocturno.");
+    } else {
+      document.body.classList.remove('dark');
+      if (toggleBtn) toggleBtn.textContent = '🌙';
+    }
+  }
 }
