@@ -696,9 +696,6 @@ function setWeightOption(id, option) {
 function filterCat(cat) {
   currentCat = cat;
 
-  // Desactivar todas las marcas seleccionadas al cambiar de categoría
-  document.querySelectorAll('.brand-card').forEach(b => b.classList.remove('active'));
-
   document.querySelectorAll('.cat-card').forEach(p => {
     p.classList.toggle('active', p.dataset.cat === cat);
   });
@@ -718,46 +715,7 @@ function filterCat(cat) {
   renderMenu(items);
 }
 
-// ─── BRAND FILTER (Estilo PedidoYa) ──────────────────────────────
-function filterMenuByBrand(brand) {
-  // Desactivar pastillas de categoría
-  document.querySelectorAll('.cat-card').forEach(p => p.classList.remove('active'));
-  
-  // Activar la tarjeta de la marca cliqueada
-  document.querySelectorAll('.brand-card').forEach(b => {
-    const nameEl = b.querySelector('.brand-card-name');
-    const isTarget = nameEl && nameEl.textContent.toLowerCase().includes(brand.toLowerCase());
-    b.classList.toggle('active', isTarget);
-  });
 
-  const query = brand.toLowerCase();
-  let items = [];
-  
-  if (query === 'mccain') {
-    items = MENU.filter(i => i.name.toLowerCase().includes('mccain') || i.tags.includes('marca-premium'));
-    document.getElementById('menuTitle').textContent = '🏆 Papas Fritas McCain';
-  } else if (query === 'granja') {
-    items = MENU.filter(i => i.cat === 'pollo-granja' || i.name.toLowerCase().includes('pollo entero') || i.name.toLowerCase().includes('pechuga') || i.name.toLowerCase().includes('arrolladito'));
-    document.getElementById('menuTitle').textContent = '🐔 Productos de Granja Premium';
-  } else if (query === 'mar') {
-    items = MENU.filter(i => i.cat === 'pescados-mariscos' || i.tags.includes('mar'));
-    document.getElementById('menuTitle').textContent = '🌊 Pescadería Puerto Mar';
-  } else if (query === 'veggie') {
-    items = MENU.filter(i => i.cat === 'veggie-soja' || i.tags.includes('vegetariana'));
-    document.getElementById('menuTitle').textContent = '🌱 Línea Saludable & Veggie';
-  } else if (query === 'campo') {
-    items = MENU.filter(i => i.cat === 'almacen-huevos' || i.name.toLowerCase().includes('huevo'));
-    document.getElementById('menuTitle').textContent = '🥚 Huevos de Campo y Almacén';
-  }
-
-  renderMenu(items);
-  
-  // Desplazamiento suave al título del catálogo
-  const menuTitleEl = document.getElementById('menuTitle');
-  if (menuTitleEl) {
-    menuTitleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-}
 
 function filterMenu() {
   const q = document.getElementById('searchInput').value.toLowerCase();
@@ -1347,9 +1305,8 @@ function selectSpotlightSuggestion(id) {
 // 4. FILTROS RÁPIDOS POR TAGS
 let activeTag = null;
 function filterMenuByTag(tag) {
-  // Desactivar categorías y marcas activas para enfocar la búsqueda por tags
+  // Desactivar categorías activas para enfocar la búsqueda por tags
   document.querySelectorAll('.cat-card').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.brand-card').forEach(b => b.classList.remove('active'));
   
   const tagPills = document.querySelectorAll('.quick-tags-wrap .tag-pill');
   
