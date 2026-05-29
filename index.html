@@ -107,16 +107,65 @@
     </div>
   </div>
 
-  <!-- CATEGORIES -->
+  <!-- CATEGORIES (Módulos Cuadrados Estilo PedidoYa) -->
   <div class="cats-wrap" id="fsCats">
+    <div class="section-label">📂 Categorías</div>
     <div class="cats-scroll" id="catScroll">
-      <div class="cat-pill active" onclick="filterCat('todos')" data-cat="todos"><span>🍽️</span>Todos</div>
-      <div class="cat-pill" onclick="filterCat('pollo-rebozado')" data-cat="pollo-rebozado"><span>🍗</span>Rebozados Pollo</div>
-      <div class="cat-pill" onclick="filterCat('pollo-granja')" data-cat="pollo-granja"><span>🐔</span>Granja y Cortes</div>
-      <div class="cat-pill" onclick="filterCat('pescados-mariscos')" data-cat="pescados-mariscos"><span>🐟</span>Mar y Río</div>
-      <div class="cat-pill" onclick="filterCat('veggie-soja')" data-cat="veggie-soja"><span>🌿</span>Veggie & Soja</div>
-      <div class="cat-pill" onclick="filterCat('bocados-papas')" data-cat="bocados-papas"><span>🍟</span>Bocados & Papas</div>
-      <div class="cat-pill" onclick="filterCat('almacen-huevos')" data-cat="almacen-huevos"><span>🥚</span>Almacén</div>
+      <div class="cat-card active" onclick="filterCat('todos')" data-cat="todos">
+        <div class="cat-card-icon">🍽️</div>
+        <div class="cat-card-name">Todos</div>
+      </div>
+      <div class="cat-card" onclick="filterCat('pollo-rebozado')" data-cat="pollo-rebozado">
+        <div class="cat-card-icon">🍗</div>
+        <div class="cat-card-name">Rebozados Pollo</div>
+      </div>
+      <div class="cat-card" onclick="filterCat('pollo-granja')" data-cat="pollo-granja">
+        <div class="cat-card-icon">🐔</div>
+        <div class="cat-card-name">Granja & Cortes</div>
+      </div>
+      <div class="cat-card" onclick="filterCat('pescados-mariscos')" data-cat="pescados-mariscos">
+        <div class="cat-card-icon">🐟</div>
+        <div class="cat-card-name">Mar y Río</div>
+      </div>
+      <div class="cat-card" onclick="filterCat('veggie-soja')" data-cat="veggie-soja">
+        <div class="cat-card-icon">🌿</div>
+        <div class="cat-card-name">Veggie & Soja</div>
+      </div>
+      <div class="cat-card" onclick="filterCat('bocados-papas')" data-cat="bocados-papas">
+        <div class="cat-card-icon">🍟</div>
+        <div class="cat-card-name">Bocados & Papas</div>
+      </div>
+      <div class="cat-card" onclick="filterCat('almacen-huevos')" data-cat="almacen-huevos">
+        <div class="cat-card-icon">🥚</div>
+        <div class="cat-card-name">Almacén</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRANDS (Marcas Asociadas Estilo PedidoYa) -->
+  <div class="brands-wrap" id="fsBrands">
+    <div class="section-label">🏷️ Marcas Destacadas</div>
+    <div class="brands-scroll" id="brandScroll">
+      <div class="brand-card" onclick="filterMenuByBrand('McCain')">
+        <div class="brand-card-logo">🍟</div>
+        <div class="brand-card-name">McCain</div>
+      </div>
+      <div class="brand-card" onclick="filterMenuByBrand('Granja')">
+        <div class="brand-card-logo">🐔</div>
+        <div class="brand-card-name">Granja 25</div>
+      </div>
+      <div class="brand-card" onclick="filterMenuByBrand('Mar')">
+        <div class="brand-card-logo">🐟</div>
+        <div class="brand-card-name">Puerto Mar</div>
+      </div>
+      <div class="brand-card" onclick="filterMenuByBrand('Veggie')">
+        <div class="brand-card-logo">🌱</div>
+        <div class="brand-card-name">Línea Veggie</div>
+      </div>
+      <div class="brand-card" onclick="filterMenuByBrand('Campo')">
+        <div class="brand-card-logo">🥚</div>
+        <div class="brand-card-name">De Campo</div>
+      </div>
     </div>
   </div>
   <!-- MENU LIST -->

@@ -2,11 +2,11 @@
   --brand: #0da1f5;         /* Celeste brillante (logo y cielo) */
   --brand2: #07406f;        /* Azul marino (borde logo y texto) */
   --brand-dark: #022340;    /* Azul profundo premium */
-  --bg: #f8fafc;            /* Fondo ultra limpio y suave */
+  --bg: #f3f4f6;            /* Gris suave premium estilo PedidoYa */
   --surface: #ffffff;       /* Tarjetas y paneles blancos */
   --text: #0f172a;          /* Texto principal slate oscuro, muy elegante */
   --text-light: #64748b;    /* Texto secundario slate suave */
-  --border: #f1f5f9;        /* Bordes sutiles y elegantes */
+  --border: #e5e7eb;        /* Bordes sutiles y elegantes */
   --gold: #ffd600;          /* Amarillo de realce */
   --gold-dark: #d5b200;     
   --green: #25D366;         /* Verde WhatsApp oficial */
@@ -179,33 +179,32 @@ body {
 
 /* ─── LOGO CENTRAL INFO BANNER ─── */
 .brand-hero {
-  margin: 12px 18px 4px;
-  padding: 8px 0 12px;
-  background: transparent;
-  border: none;
-  border-bottom: 1.5px solid var(--border);
-  border-radius: 0;
-  box-shadow: none;
-  display: flex; gap: 12px; align-items: center;
+  margin: 0;
+  padding: 24px 20px;
+  background: linear-gradient(135deg, rgba(13, 161, 245, 0.07) 0%, rgba(7, 64, 111, 0.05) 100%), var(--surface);
+  border-bottom: 1px solid rgba(7, 64, 111, 0.08);
+  display: flex; gap: 16px; align-items: center;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
 }
 .brand-hero-logo {
-  width: 50px; height: 50px; border-radius: 50%;
+  width: 65px; height: 65px; border-radius: 50%;
   background: radial-gradient(circle, var(--brand) 0%, var(--brand2) 100%);
-  border: 2px solid var(--brand2);
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
+  border: 3px solid white;
+  box-shadow: 0 6px 16px rgba(7, 64, 111, 0.15);
   flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.brand-hero-logo-t1 { font-family: 'Outfit', sans-serif; font-weight:800; font-size:10px; color: var(--gold); text-shadow:0.5px 0.5px 0px var(--brand-dark); line-height:1; }
-.brand-hero-logo-t2 { font-family: 'Outfit', sans-serif; font-weight:800; font-size:15px; color: white; text-shadow:1px 1px 0px var(--brand-dark); line-height:1; margin:-1px 0;}
-.brand-hero-logo-t3 { font-family: 'Outfit', sans-serif; font-style:italic; font-weight:600; font-size:6px; color: white; line-height:1; text-transform:uppercase; }
+.brand-hero-logo-t1 { font-family: 'Outfit', sans-serif; font-weight:800; font-size:12px; color: var(--gold); text-shadow:0.5px 0.5px 0px var(--brand-dark); line-height:1; }
+.brand-hero-logo-t2 { font-family: 'Outfit', sans-serif; font-weight:800; font-size:19px; color: white; text-shadow:1px 1px 0px var(--brand-dark); line-height:1; margin:-1px 0;}
+.brand-hero-logo-t3 { font-family: 'Outfit', sans-serif; font-style:italic; font-weight:600; font-size:7px; color: white; line-height:1; text-transform:uppercase; }
 
 .brand-hero-info { flex: 1; }
-.brand-hero-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 15px; color: var(--brand2); margin-bottom: 2px; }
-.brand-hero-address { font-size: 11px; font-weight: 600; color: var(--text-light); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
-.brand-hero-socials { display: flex; gap: 6px; flex-wrap: wrap; }
+.brand-hero-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 18px; color: var(--brand2); margin-bottom: 3px; }
+.brand-hero-address { font-size: 12px; font-weight: 600; color: var(--text-light); margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+.brand-hero-socials { display: flex; gap: 8px; flex-wrap: wrap; }
 .hero-social-tag {
-  font-size: 9px; font-weight: 700; color: white; background: var(--brand2);
-  padding: 3px 6px; border-radius: 6px; text-decoration: none; display: flex; align-items: center; gap: 3px;
+  font-size: 10px; font-weight: 700; color: white; background: var(--brand2);
+  padding: 4px 8px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 4px;
   transition: all 0.2s;
 }
 .hero-social-tag.ig { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
@@ -254,30 +253,81 @@ body {
 .dot.active { width:22px; background:var(--brand); }
 
 /* ─── CATEGORY NAVIGATION ─── */
-.cats-wrap { padding:10px 0 14px; }
-.section-label {
-  font-family:'Outfit',sans-serif; font-weight:800; font-size:17px; color: var(--brand2);
-  margin-bottom:12px; padding: 0 18px;
+/* ─── CATEGORY NAVIGATION (Rounded Square Módulos) ─── */
+.cats-wrap { padding: 12px 0 16px; border-bottom: 1px solid rgba(7, 64, 111, 0.06); }
+.cats-scroll { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 4px 18px; }
+.cats-scroll::-webkit-scrollbar { display: none; }
+
+.cat-card {
+  flex-shrink: 0; width: 90px; height: 90px; border-radius: 18px;
+  background: var(--surface); border: 1px solid rgba(7, 64, 111, 0.08);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
 }
-.cats-scroll { display:flex; gap:10px; overflow-x:auto; scrollbar-width:none; padding: 0 18px 4px; }
-.cats-scroll::-webkit-scrollbar { display:none; }
-.cat-pill {
-  flex-shrink:0; display:flex; align-items:center; gap:6px;
-  padding:10px 18px; border-radius:24px;
-  background:var(--surface); border:1.5px solid var(--border);
-  font-size:13px; font-weight:700; color: var(--text-light); cursor:pointer;
-  transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); white-space:nowrap;
-  box-shadow: var(--shadow-sm);
+.cat-card-icon {
+  font-size: 28px; transition: transform 0.25s;
 }
-.cat-pill.active {
-  background: linear-gradient(135deg, var(--brand), var(--brand2));
-  border-color:transparent; color:white;
+.cat-card-name {
+  font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 700; color: var(--text-light); 
+  text-align: center; line-height: 1.2;
+}
+.cat-card:not(.active):hover {
+  transform: translateY(-2px);
+  border-color: var(--brand);
+  box-shadow: 0 6px 14px rgba(13, 161, 245, 0.08);
+}
+.cat-card.active {
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
+  border-color: transparent;
   box-shadow: var(--shadow-brand);
   transform: translateY(-2px);
 }
-.cat-pill:not(.active):active { transform:scale(0.95); }
-.cat-pill span { font-size:16px; transition: transform 0.3s; }
-.cat-pill.active span { transform: scale(1.2); }
+.cat-card.active .cat-card-name {
+  color: white;
+}
+.cat-card.active .cat-card-icon {
+  transform: scale(1.15);
+}
+.cat-card:active { transform: scale(0.95); }
+
+/* ─── BRANDS SECTION (Marcas Asociadas) ─── */
+.brands-wrap { padding: 12px 0 16px; border-bottom: 1px solid rgba(7, 64, 111, 0.06); }
+.brands-scroll { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 4px 18px; }
+.brands-scroll::-webkit-scrollbar { display: none; }
+
+.brand-card {
+  flex-shrink: 0; width: 90px; height: 90px; border-radius: 18px;
+  background: var(--surface); border: 1px solid rgba(7, 64, 111, 0.08);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+}
+.brand-card-logo {
+  font-size: 28px; transition: transform 0.25s;
+}
+.brand-card-name {
+  font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 700; color: var(--text-light); 
+  text-align: center; line-height: 1.2;
+}
+.brand-card:not(.active):hover {
+  transform: translateY(-2px);
+  border-color: var(--brand2);
+  box-shadow: 0 6px 14px rgba(7, 64, 111, 0.08);
+}
+.brand-card.active {
+  background: linear-gradient(135deg, var(--brand2) 0%, var(--brand-dark) 100%);
+  border-color: transparent;
+  box-shadow: 0 6px 14px rgba(7, 64, 111, 0.15);
+  transform: translateY(-2px);
+}
+.brand-card.active .brand-card-name {
+  color: white;
+}
+.brand-card.active .brand-card-logo {
+  transform: scale(1.15);
+}
+.brand-card:active { transform: scale(0.95); }
 
 /* ─── FEATURED ("LOS MÁS PEDIDOS") ─── */
 .featured-wrap { padding:10px 0 20px; }
@@ -345,21 +395,22 @@ body {
 .menu-list { display:flex; flex-direction:column; gap:12px; }
 
 .menu-item {
-  background:var(--surface); border:1.5px solid transparent;
-  border-radius:20px; padding:12px; display:flex; gap:12px;
-  box-shadow: var(--shadow-sm);
-  cursor:pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position:relative;
+  background: var(--surface); border: 1px solid rgba(7, 64, 111, 0.05);
+  border-radius: 20px; padding: 14px; display: flex; gap: 14px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
-/* Alternancia de colores respetando el folleto */
-.menu-list > .menu-item:nth-child(even) {
-  background: var(--row-light);
+.menu-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  border-color: rgba(13, 161, 245, 0.15);
 }
 .menu-item.in-cart {
-  border-color: rgba(13, 161, 245, 0.3);
-  box-shadow: 0 6px 16px rgba(13, 161, 245, 0.08);
+  border-color: rgba(13, 161, 245, 0.35);
+  box-shadow: 0 8px 20px rgba(13, 161, 245, 0.08);
 }
-.menu-item:active { transform:scale(0.99); }
+.menu-item:active { transform: scale(0.97); }
 
 .item-photo {
   width:85px; height:85px; flex-shrink:0;
