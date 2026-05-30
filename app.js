@@ -136,7 +136,7 @@ function checkLastOrderHistory() {
           const [idStr, opt] = key.split('-');
           const item = MENU.find(i => i.id === parseInt(idStr));
           if (item) {
-            const optText = item.unitType === 'peso' ? (opt === '0.5kg' ? '½ Kg' : '1 Kg') : 'Unid.';
+            const optText = (item.unitType === 'peso' || item.unitType === 'mixto') ? (opt === '0.5kg' ? '½ Kg' : (opt === '1kg' ? '1 Kg' : 'Unid.')) : 'Unid.';
             descItems.push(`${item.name} (${optText})`);
           }
         });
@@ -164,7 +164,7 @@ function loadLastOrder(event) {
       cart = JSON.parse(lastCartStr);
       Object.keys(cart).forEach(key => {
         const [idStr, opt] = key.split('-');
-        if (opt === '1kg' || opt === '0.5kg') {
+        if (opt === '1kg' || opt === '0.5kg' || opt === 'unidad') {
           selectedWeights[parseInt(idStr)] = opt;
         }
       });
@@ -235,7 +235,7 @@ function addQuickSuggestion(id) {
   const item = MENU.find(i => i.id === id);
   if (!item) return;
 
-  const opt = item.unitType === 'peso' ? '1kg' : 'unidad';
+  const opt = (item.unitType === 'peso' || item.unitType === 'mixto') ? '1kg' : 'unidad';
   const cartKey = `${id}-${opt}`;
   
   cart[cartKey] = (cart[cartKey] || 0) + 1;
@@ -250,7 +250,7 @@ function checkKiloOptimizer() {
 
   // Buscar el primer producto pesable que tenga al menos 2 unidades de medio kilo
   const optimizable = MENU.find(item => {
-    if (item.unitType !== 'peso') return false;
+    if (item.unitType !== 'peso' && item.unitType !== 'mixto') return false;
     const qtyHalf = cart[`${item.id}-0.5kg`] || 0;
     return qtyHalf >= 2;
   });
@@ -368,11 +368,11 @@ function renderMenu(items) {
 
   items.forEach(item => {
     // Determinar la opción de peso por defecto si no está seteada
-    if (item.unitType === 'peso' && !selectedWeights[item.id]) {
+    if ((item.unitType === 'peso' || item.unitType === 'mixto') && !selectedWeights[item.id]) {
       selectedWeights[item.id] = '1kg';
     }
 
-    const opt = item.unitType === 'peso' ? selectedWeights[item.id] : 'unidad';
+    const opt = (item.unitType === 'peso' || item.unitType === 'mixto') ? selectedWeights[item.id] : 'unidad';
     const cartKey = `${item.id}-${opt}`;
     const qty = cart[cartKey] || 0;
     const inCart = qty > 0;
@@ -384,7 +384,7 @@ function renderMenu(items) {
          <button class="qty-btn" onclick="changeQty(${item.id},1,event)">+</button>`
       : `<button class="qty-add-btn" onclick="addItem(${item.id},event)">+</button>`;
 
-    // Selector de peso (sólo para productos pesables)
+    // Selector de peso (sólo para productos pesables o mixtos)
     let weightSelectorHTML = '';
     let priceLabelHTML = '';
 
@@ -399,6 +399,27 @@ function renderMenu(items) {
 
       const currentPrice = opt === '0.5kg' ? item.priceHalf : item.price;
       const unitText = opt === '0.5kg' ? '½ Kg' : 'Kg';
+      priceLabelHTML = `${formatPrice(currentPrice)} <span class="price-unit">x ${unitText}</span>`;
+    } else if (item.unitType === 'mixto') {
+      const activeHalf = opt === '0.5kg' ? 'active' : '';
+      const activeKilo = opt === '1kg' ? 'active' : '';
+      const activeUnit = opt === 'unidad' ? 'active' : '';
+      weightSelectorHTML = `
+        <div class="weight-selector" onclick="event.stopPropagation()">
+          <div class="weight-pill ${activeHalf}" onclick="setWeightOption(${item.id}, '0.5kg')">½ Kg</div>
+          <div class="weight-pill ${activeKilo}" onclick="setWeightOption(${item.id}, '1kg')">1 Kg</div>
+          <div class="weight-pill ${activeUnit}" onclick="setWeightOption(${item.id}, 'unidad')">Unidad</div>
+        </div>`;
+
+      let currentPrice = item.price;
+      let unitText = 'Kg';
+      if (opt === '0.5kg') {
+        currentPrice = item.priceHalf;
+        unitText = '½ Kg';
+      } else if (opt === 'unidad') {
+        currentPrice = item.priceUnit;
+        unitText = 'Unidad';
+      }
       priceLabelHTML = `${formatPrice(currentPrice)} <span class="price-unit">x ${unitText}</span>`;
     } else {
       let unitSuffix = 'Unidad';
@@ -519,13 +540,22 @@ function openProductModal(id) {
   const actionsWrap = document.getElementById('pmActions');
 
   if (priceVal && actionsWrap) {
-    if (item.unitType === 'peso') {
+    if (item.unitType === 'peso' || item.unitType === 'mixto') {
       const activeWeight = selectedWeights[item.id] || '1kg';
       
       const updateModalPriceAndActions = (weightOpt) => {
         selectedWeights[item.id] = weightOpt;
-        const currentPrice = weightOpt === '0.5kg' ? item.priceHalf : item.price;
-        const unitText = weightOpt === '0.5kg' ? '½ Kg' : 'Kg';
+        
+        let currentPrice = item.price;
+        let unitText = 'Kg';
+        if (weightOpt === '0.5kg') {
+          currentPrice = item.priceHalf;
+          unitText = '½ Kg';
+        } else if (weightOpt === 'unidad') {
+          currentPrice = item.priceUnit;
+          unitText = 'Unidad';
+        }
+        
         priceVal.innerHTML = `${formatPrice(currentPrice)} <span class="pm-price-unit">x ${unitText}</span>`;
         
         const cartKey = `${item.id}-${weightOpt}`;
@@ -537,6 +567,7 @@ function openProductModal(id) {
             <div class="pm-weight-selector-modal">
               <button class="pm-weight-pill-modal ${weightOpt === '0.5kg' ? 'active' : ''}" id="pmWeightHalfBtn">½ Kg</button>
               <button class="pm-weight-pill-modal ${weightOpt === '1kg' ? 'active' : ''}" id="pmWeightKiloBtn">1 Kg</button>
+              ${item.unitType === 'mixto' ? `<button class="pm-weight-pill-modal ${weightOpt === 'unidad' ? 'active' : ''}" id="pmWeightUnitBtn">Unidad</button>` : ''}
             </div>
             <div class="pm-qty-controls-modal">
               <button class="pm-qty-btn-modal" id="pmMinusBtn">−</button>
@@ -549,6 +580,7 @@ function openProductModal(id) {
             <div class="pm-weight-selector-modal">
               <button class="pm-weight-pill-modal ${weightOpt === '0.5kg' ? 'active' : ''}" id="pmWeightHalfBtn">½ Kg</button>
               <button class="pm-weight-pill-modal ${weightOpt === '1kg' ? 'active' : ''}" id="pmWeightKiloBtn">1 Kg</button>
+              ${item.unitType === 'mixto' ? `<button class="pm-weight-pill-modal ${weightOpt === 'unidad' ? 'active' : ''}" id="pmWeightUnitBtn">Unidad</button>` : ''}
             </div>
             <button class="pm-add-cart-btn" id="pmAddBtn">
               <span>🛒</span> Agregar al Carrito (${unitText})
@@ -559,8 +591,10 @@ function openProductModal(id) {
         
         const halfBtn = document.getElementById('pmWeightHalfBtn');
         const kiloBtn = document.getElementById('pmWeightKiloBtn');
+        const unitBtn = document.getElementById('pmWeightUnitBtn');
         if (halfBtn) halfBtn.onclick = () => updateModalPriceAndActions('0.5kg');
         if (kiloBtn) kiloBtn.onclick = () => updateModalPriceAndActions('1kg');
+        if (unitBtn) unitBtn.onclick = () => updateModalPriceAndActions('unidad');
         
         const addBtn = document.getElementById('pmAddBtn');
         if (addBtn) {
@@ -662,7 +696,7 @@ function addItemFromModal(id, opt) {
   updateAll(id);
   spawnParticle(id);
   const item = MENU.find(i => i.id === id);
-  const unitText = item.unitType === 'peso' ? (opt === '0.5kg' ? ' x ½ Kg' : ' x 1 Kg') : '';
+  const unitText = (item.unitType === 'peso' || item.unitType === 'mixto') ? (opt === '0.5kg' ? ' x ½ Kg' : (opt === '1kg' ? ' x 1 Kg' : ' x Unidad')) : '';
   showToast(`🍗 ${item.name}${unitText} agregado`);
 }
 
@@ -735,7 +769,7 @@ function addItem(id, event) {
   const item = MENU.find(i => i.id === id);
   if (!item) return;
 
-  const opt = item.unitType === 'peso' ? (selectedWeights[id] || '1kg') : 'unidad';
+  const opt = (item.unitType === 'peso' || item.unitType === 'mixto') ? (selectedWeights[id] || '1kg') : 'unidad';
   const cartKey = `${id}-${opt}`;
 
   cart[cartKey] = (cart[cartKey] || 0) + 1;
@@ -743,7 +777,7 @@ function addItem(id, event) {
   updateAll(id);
   spawnParticle(id);
 
-  const unitText = item.unitType === 'peso' ? (opt === '0.5kg' ? ' x ½ Kg' : ' x 1 Kg') : '';
+  const unitText = (item.unitType === 'peso' || item.unitType === 'mixto') ? (opt === '0.5kg' ? ' x ½ Kg' : (opt === '1kg' ? ' x 1 Kg' : ' x Unidad')) : '';
   showToast(`🍗 ${item.name}${unitText} agregado`);
 }
 
@@ -755,7 +789,7 @@ function changeQty(id, delta, event) {
   const item = MENU.find(i => i.id === id);
   if (!item) return;
 
-  const opt = item.unitType === 'peso' ? (selectedWeights[id] || '1kg') : 'unidad';
+  const opt = (item.unitType === 'peso' || item.unitType === 'mixto') ? (selectedWeights[id] || '1kg') : 'unidad';
   const cartKey = `${id}-${opt}`;
 
   cart[cartKey] = Math.max(0, (cart[cartKey] || 0) + delta);
@@ -780,7 +814,7 @@ function updateAll(changedId) {
   // Re-renderizamos los controles de la tarjeta afectada en la vista principal
   const item = MENU.find(i => i.id === changedId);
   if (item) {
-    const opt = item.unitType === 'peso' ? (selectedWeights[changedId] || '1kg') : 'unidad';
+    const opt = (item.unitType === 'peso' || item.unitType === 'mixto') ? (selectedWeights[changedId] || '1kg') : 'unidad';
     const cartKey = `${changedId}-${opt}`;
     const qty = cart[cartKey] || 0;
 
@@ -817,7 +851,12 @@ function getTotals() {
     const item = MENU.find(i => i.id === parseInt(idStr));
     if (item) {
       count += qty;
-      const price = (opt === '0.5kg' && item.priceHalf) ? item.priceHalf : item.price;
+      let price = item.price;
+      if (opt === '0.5kg' && item.priceHalf) {
+        price = item.priceHalf;
+      } else if (opt === 'unidad' && item.priceUnit) {
+        price = item.priceUnit;
+      }
       total += price * qty;
     }
   });
@@ -883,12 +922,12 @@ function renderCartPanel() {
     const item = MENU.find(i => i.id === parseInt(idStr));
     if (!item) return;
 
-    const price = (opt === '0.5kg' && item.priceHalf) ? item.priceHalf : item.price;
+    const price = (opt === '0.5kg' && item.priceHalf) ? item.priceHalf : ((opt === 'unidad' && item.priceUnit) ? item.priceUnit : item.price);
     
     // Label de la opción seleccionada
     let optionLabel = '';
-    if (item.unitType === 'peso') {
-      optionLabel = opt === '0.5kg' ? ' x ½ Kg' : ' x 1 Kg';
+    if (item.unitType === 'peso' || item.unitType === 'mixto') {
+      optionLabel = opt === '0.5kg' ? ' x ½ Kg' : (opt === '1kg' ? ' x 1 Kg' : ' x Unidad');
     } else {
       let unitSuffix = 'Unidad';
       if (item.cat === 'almacen-huevos' && item.id === 45) unitSuffix = 'Docena';
@@ -972,11 +1011,11 @@ function sendWhatsApp() {
     const [idStr, opt] = key.split('-');
     const item = MENU.find(i => i.id === parseInt(idStr));
     if (item) {
-      const price = (opt === '0.5kg' && item.priceHalf) ? item.priceHalf : item.price;
+      const price = (opt === '0.5kg' && item.priceHalf) ? item.priceHalf : ((opt === 'unidad' && item.priceUnit) ? item.priceUnit : item.price);
       
       let optLabel = '';
-      if (item.unitType === 'peso') {
-        optLabel = opt === '0.5kg' ? ' (½ Kg)' : ' (1 Kg)';
+      if (item.unitType === 'peso' || item.unitType === 'mixto') {
+        optLabel = opt === '0.5kg' ? ' (½ Kg)' : (opt === '1kg' ? ' (1 Kg)' : ' (Unidad)');
       } else {
         let suffix = 'Unidad';
         if (item.cat === 'almacen-huevos' && item.id === 45) suffix = 'Docena';
