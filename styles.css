@@ -27,10 +27,7 @@ body {
   font-family: 'Outfit', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
-  max-width: 430px;
-  margin: 0 auto;
   position: relative;
-  box-shadow: 0 0 40px rgba(7, 64, 111, 0.05);
 }
 
 /* ─── SPLASH SCREEN ─── */
@@ -99,6 +96,12 @@ body {
 #app {
   opacity:0; animation: fadeIn 0.4s ease 1.4s forwards;
   padding-bottom: 120px;
+  min-height: 100vh;
+  box-shadow: 0 0 40px rgba(7, 64, 111, 0.05);
+  position: relative;
+  max-width: 430px;
+  margin: 0 auto;
+  background: var(--bg);
 }
 @keyframes fadeIn { to { opacity:1; } }
 
@@ -1247,3 +1250,135 @@ body.dark .quick-tags-wrap .tag-pill.active {
   background: var(--surface); color: var(--brand2); border: 1.5px solid var(--border);
 }
 .receipt-btn.close:active { transform: scale(0.95); background: var(--bg); }
+
+/* ─── DISPOSITIVOS MEDIANOS Y GRANDES (TABLETS Y PC) ─── */
+@media (min-width: 768px) {
+  /* 1. App Container Card Layout */
+  #app {
+    max-width: 1024px;
+    margin: 40px auto;
+    border-radius: 24px;
+    box-shadow: 0 20px 80px rgba(7, 64, 111, 0.12);
+    min-height: auto;
+    border: 1px solid rgba(7, 64, 111, 0.08);
+  }
+  
+  /* Alinear esquinas del encabezado con el contenedor */
+  .header {
+    border-radius: 24px 24px 0 0;
+  }
+  
+  /* Alinear esquinas del pie de página con el contenedor */
+  .app-footer {
+    margin: 30px 24px 24px;
+    border-radius: 20px;
+  }
+
+  /* 2. Promociones: Grilla de múltiples columnas en lugar de carrusel */
+  .promo-scroll {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    padding: 10px 18px;
+  }
+  .promo-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .promo-dots {
+    display: none !important; /* Ocultar puntos del carrusel */
+  }
+
+  /* 3. Categorías: Distribución flex en lugar de scroll horizontal */
+  .cats-scroll {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow-x: visible;
+    padding: 10px 24px;
+    gap: 16px;
+  }
+  .cat-card {
+    width: 100px;
+    height: 100px;
+  }
+
+  /* 4. Filtros Rápidos de Tags: Centrados */
+  .quick-tags-wrap {
+    justify-content: center;
+    overflow-x: visible;
+    padding: 8px 24px 14px;
+  }
+
+  /* 5. Catálogo de Productos: Grilla de 2 columnas en Tablets */
+  .menu-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .menu-item {
+    margin-bottom: 0;
+  }
+
+  /* 6. Barra Flotante de Compra: Ancho controlado y centrada */
+  .bottom-bar {
+    max-width: 450px;
+    bottom: 30px;
+  }
+
+  /* 7. Carrito: Deslizamiento lateral derecho (Sidebar Drawer) */
+  .panel {
+    top: 0; bottom: 0; right: 0; left: auto;
+    transform: translateX(100%);
+    width: 450px;
+    max-width: 90vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 24px 0 0 24px;
+    padding: 30px 24px;
+    box-shadow: -15px 0 50px rgba(7, 64, 111, 0.15);
+  }
+  .panel.open {
+    transform: translateX(0) translateY(0);
+  }
+  .panel-handle {
+    display: none !important; /* Quitar manija de arrastre móvil */
+  }
+
+  /* 8. Detalle del Producto: Modal centrado flotante */
+  .product-modal {
+    top: 50%; bottom: auto; left: 50%;
+    transform: translate(-50%, -40%) scale(0.95);
+    border-radius: 24px;
+    width: 500px;
+    max-width: 90vw;
+    max-height: 85vh;
+    box-shadow: 0 20px 60px rgba(2, 35, 64, 0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  }
+  .product-modal.open {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: all;
+  }
+  .pm-image-wrap {
+    height: 240px;
+    border-radius: 24px 24px 0 0;
+  }
+}
+
+/* ─── PANTALLAS GRANDES Y MONITORES DE ESCRITORIO (PC) ─── */
+@media (min-width: 1024px) {
+  #app {
+    max-width: 1180px;
+  }
+  
+  /* Grilla de 3 columnas para productos en Escritorio */
+  .menu-list {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}
