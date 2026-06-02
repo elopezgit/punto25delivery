@@ -210,10 +210,10 @@ function updateFreeShippingTracker(total) {
     
     // Sugerencias de productos complementarios baratos
     const sugItems = [
-      { id: 45, name: 'Huevos Campo', price: 2200, emoji: '🥚' },
-      { id: 43, name: 'Papas McCain', price: 3200, emoji: '🍟' },
-      { id: 35, name: 'Tequeños', price: 3450, emoji: '🫔' },
-      { id: 34, name: 'Bastones Mozzarella', price: 3650, emoji: '🧀' }
+      { id: 45, name: 'Huevo Blanco #0', price: 350, emoji: '🥚' },
+      { id: 38, name: 'Milanesa de Soja', price: 1800, emoji: '🌱' },
+      { id: 41, name: 'Canastita Humita', price: 2500, emoji: '🥧' },
+      { id: 43, name: 'Papas McCain', price: 8000, emoji: '🍟' }
     ];
 
     if (grid) {
