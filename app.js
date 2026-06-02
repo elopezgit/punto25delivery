@@ -4,6 +4,7 @@ let selectedWeights = {};       // Almacena: { id: "1kg" o "0.5kg" }
 let selectedWaIdx = 0;          // Índice del número de WhatsApp seleccionado (0 o 1)
 let currentCat = 'todos';       // Categoría activa
 let deliveryMode = 'delivery';  // Modo de envío: 'delivery' o 'takeaway'
+let paymentMethod = 'efectivo'; // Método de pago seleccionado: 'efectivo' o 'transferencia'
 let toastTimer;
 
 // ─── HELPERS ─────────────────────────────────────────────────────
@@ -970,6 +971,9 @@ function renderCartPanel() {
   // Actualizar los widgets interactivos de la cabecera del carrito
   updateFreeShippingTracker(total);
   checkKiloOptimizer();
+
+  // Mantener actualizado el vuelto y la visualización de la sección de pago
+  setPaymentMethod(paymentMethod);
 }
 
 // ─── DELIVERY MODE ────────────────────────────────────────────────
@@ -980,12 +984,81 @@ function setDelivery(mode) {
   renderCartPanel();
 }
 
+// ─── PAYMENT METHOD ───────────────────────────────────────────────
+function setPaymentMethod(method) {
+  paymentMethod = method;
+  const payCashBtn = document.getElementById('payCashBtn');
+  const payTransBtn = document.getElementById('payTransBtn');
+  const cashSection = document.getElementById('cashSection');
+  const transferSection = document.getElementById('transferSection');
+
+  if (payCashBtn) payCashBtn.classList.toggle('active', method === 'efectivo');
+  if (payTransBtn) payTransBtn.classList.toggle('active', method === 'transferencia');
+  if (cashSection) cashSection.style.display = method === 'efectivo' ? 'block' : 'none';
+  if (transferSection) transferSection.style.display = method === 'transferencia' ? 'block' : 'none';
+
+  if (method === 'efectivo') {
+    calculateChange();
+  }
+}
+
+function calculateChange() {
+  const totalObj = getTotals();
+  const isFreeShipping = totalObj.total >= 12000;
+  const shipping = (deliveryMode === 'delivery' && !isFreeShipping) ? 1000 : 0;
+  const finalTotal = totalObj.total + shipping;
+
+  const inputEl = document.getElementById('fVuelto');
+  const resultEl = document.getElementById('changeResult');
+  const amountEl = document.getElementById('changeAmount');
+
+  if (!inputEl || !resultEl || !amountEl) return;
+
+  const payVal = parseFloat(inputEl.value);
+  if (isNaN(payVal) || payVal <= 0) {
+    resultEl.style.display = 'none';
+    return;
+  }
+
+  if (payVal >= finalTotal) {
+    const change = payVal - finalTotal;
+    amountEl.textContent = formatPrice(change);
+    resultEl.style.display = 'block';
+  } else {
+    resultEl.style.display = 'none';
+  }
+}
+
+function copyToClipboard(elementId, successMsg) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const text = el.textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    showToast("📋 " + successMsg);
+  }).catch(err => {
+    // Fallback para entornos no HTTPS o navegadores antiguos
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      showToast("📋 " + successMsg);
+    } catch (err2) {
+      showToast("⚠️ No se pudo copiar");
+    }
+    document.body.removeChild(textArea);
+  });
+}
+
 // ─── SEND WHATSAPP ORDER ──────────────────────────────────────────
 function sendWhatsApp() {
   const nombre = document.getElementById('fNombre').value.trim();
   const tel = document.getElementById('fTel').value.trim();
   const dir = document.getElementById('fDir').value.trim();
   const nota = document.getElementById('fNota').value.trim();
+  const vueltoInput = document.getElementById('fVuelto');
+  const payWith = vueltoInput ? parseFloat(vueltoInput.value) : 0;
 
   if (!nombre || !tel) { showToast('⚠️ Completá tu nombre y teléfono'); return; }
   if (deliveryMode === 'delivery' && !dir) { showToast('⚠️ Ingresá tu dirección de entrega'); return; }
@@ -1002,6 +1075,18 @@ function sendWhatsApp() {
   msg += deliveryMode === 'delivery'
     ? `📍 *Dirección de Entrega:* ${dir}\n`
     : `🏃 *Modalidad:* Retiro en local (Corrientes 664)\n`;
+  
+  // Agregar Renglón de Método de Pago
+  const finalTotal = total + envio;
+  if (paymentMethod === 'efectivo') {
+    msg += `💵 *Método de Pago:* Efectivo\n`;
+    if (payWith > 0 && payWith >= finalTotal) {
+      msg += `💰 *Paga con:* ${formatPrice(payWith)} (Vuelto: ${formatPrice(payWith - finalTotal)})\n`;
+    }
+  } else {
+    msg += `📱 *Método de Pago:* Transferencia Bancaria (Comprobante pendiente)\n`;
+  }
+  
   msg += `\n🛒 *Detalle del Pedido:*\n`;
 
   // Compilar los items para la generación del ticket digital
@@ -1057,8 +1142,9 @@ function sendWhatsApp() {
   closeCart();
   
   // Abrir la ventana del ticket de compra digital interactivo en pantalla
+  const changeValue = (paymentMethod === 'efectivo' && payWith >= finalTotal) ? (payWith - finalTotal) : 0;
   setTimeout(() => {
-    openReceiptModal(orderId, nombre, tel, deliveryMode === 'delivery', receiptItems, total, envio);
+    openReceiptModal(orderId, nombre, tel, deliveryMode === 'delivery', receiptItems, total, envio, paymentMethod, payWith, changeValue);
   }, 400);
   
   showToast(`📲 Pedido ${orderId} enviado a WhatsApp`);
@@ -1195,7 +1281,7 @@ function startVoiceSearch(event) {
 }
 
 // 2. RECIBO DE COMPRA DIGITAL INTERACTIVO (Ticket)
-function openReceiptModal(orderId, customerName, phone, isDelivery, itemsList, subtotal, shippingCost) {
+function openReceiptModal(orderId, customerName, phone, isDelivery, itemsList, subtotal, shippingCost, method, payWith, change) {
   const overlay = document.getElementById('receiptOverlay');
   const modal = document.getElementById('receiptModal');
   
@@ -1208,6 +1294,20 @@ function openReceiptModal(orderId, customerName, phone, isDelivery, itemsList, s
   document.getElementById('recName').textContent = customerName;
   document.getElementById('recTel').textContent = phone;
   document.getElementById('recDelivery').textContent = isDelivery ? '🛵 Delivery a Domicilio' : '🏃 Retiro en Local';
+  
+  // Renderizar método de pago en el recibo
+  const recPayment = document.getElementById('recPayment');
+  if (recPayment) {
+    if (method === 'efectivo') {
+      let payText = 'Efectivo';
+      if (payWith > 0 && payWith >= (subtotal + shippingCost)) {
+        payText += ` (Paga: ${formatPrice(payWith)}, Vuelto: ${formatPrice(change)})`;
+      }
+      recPayment.textContent = payText;
+    } else {
+      recPayment.textContent = 'Transferencia Bancaria';
+    }
+  }
   
   // Renderizar ítems como un recibo físico real
   const itemsEl = document.getElementById('recItems');
@@ -1246,6 +1346,9 @@ function closeReceiptModal() {
   // Limpiar y resetear el carrito tras el éxito comercial
   cart = {};
   selectedWeights = {};
+  paymentMethod = 'efectivo'; // Resetear método de pago
+  const vueltoEl = document.getElementById('fVuelto');
+  if (vueltoEl) vueltoEl.value = '';
   
   // Salvar cambios limpios
   const nombre = document.getElementById('fNombre') ? document.getElementById('fNombre').value.trim() : '';
@@ -1265,6 +1368,7 @@ function downloadReceipt() {
   const name = document.getElementById('recName').textContent;
   const tel = document.getElementById('recTel').textContent;
   const mode = document.getElementById('recDelivery').textContent;
+  const payment = document.getElementById('recPayment') ? document.getElementById('recPayment').textContent : 'Efectivo';
   
   let ticketText = `========================================\n`;
   ticketText += `             PUNTO 25 DELIVERY          \n`;
@@ -1276,6 +1380,7 @@ function downloadReceipt() {
   ticketText += `CLIENTE:   ${name}\n`;
   ticketText += `TELEFONO:  ${tel}\n`;
   ticketText += `MODO:      ${mode}\n`;
+  ticketText += `PAGO:      ${payment}\n`;
   ticketText += `----------------------------------------\n`;
   ticketText += `DETALLE DEL PEDIDO:\n`;
   

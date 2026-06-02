@@ -1251,6 +1251,67 @@ body.dark .quick-tags-wrap .tag-pill.active {
 }
 .receipt-btn.close:active { transform: scale(0.95); background: var(--bg); }
 
+/* ─── SELECTOR Y SUBSECCIONES DE MÉTODO DE PAGO ─── */
+.payment-toggle {
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: var(--bg); border-radius: 14px; padding: 5px;
+  margin-bottom: 20px; gap: 4px;
+}
+.transfer-box {
+  background: rgba(13, 161, 245, 0.05);
+  border: 1.5px dashed var(--brand);
+  padding: 16px; border-radius: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.transfer-box-title {
+  font-size: 11px; font-weight: 800; color: var(--brand2);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.transfer-data-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.transfer-data-item {
+  font-size: 13px; font-weight: 600; color: var(--text);
+}
+.transfer-copy-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface); padding: 8px 12px; border-radius: 10px;
+  border: 1px solid var(--border); font-size: 12px;
+}
+.mono-text {
+  font-family: monospace; font-weight: 700; color: var(--brand-dark);
+}
+.copy-btn {
+  background: var(--brand); color: white; border: none; border-radius: 6px;
+  padding: 4px 8px; font-family: 'Outfit', sans-serif; font-size: 10px;
+  font-weight: 700; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(13, 161, 245, 0.2);
+}
+.copy-btn:active {
+  transform: scale(0.9);
+}
+.transfer-box-footer {
+  font-size: 11px; color: var(--text-light); line-height: 1.5;
+  font-weight: 500; border-top: 1px dashed var(--border);
+  padding-top: 8px; margin-top: 4px;
+}
+
+/* Modo oscuro para cajas de transferencia */
+body.dark .transfer-box {
+  background: rgba(13, 161, 245, 0.08);
+  border-color: rgba(13, 161, 245, 0.3);
+}
+body.dark .transfer-copy-row {
+  background: var(--bg);
+  border-color: var(--border);
+}
+body.dark .mono-text {
+  color: #a5d8ff;
+}
+body.dark .copy-btn {
+  background: var(--brand);
+}
+
 /* ─── DISPOSITIVOS MEDIANOS Y GRANDES (TABLETS Y PC) ─── */
 @media (min-width: 768px) {
   /* 1. App Container Card Layout */

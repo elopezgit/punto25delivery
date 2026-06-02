@@ -61,9 +61,6 @@
       <div class="brand-hero-title">Punto 25 Delivery</div>
       <div class="brand-hero-address">📍 Corrientes 664 · Barrio Norte</div>
       <div class="brand-hero-socials">
-        <a href="https://instagram.com/punto25delivery" target="_blank" class="hero-social-tag ig">
-          📸 @punto25delivery
-        </a>
         <a href="https://wa.me/5493813253754" target="_blank" class="hero-social-tag wa">
           📲 3813253754
         </a>
@@ -173,9 +170,6 @@
       <a href="https://wa.me/5493813253754" target="_blank" class="footer-btn wa">
         💬 WhatsApp 1
       </a>
-      <a href="https://instagram.com/punto25delivery" target="_blank" class="footer-btn ig">
-        📸 Instagram
-      </a>
     </div>
   </div>
 
@@ -262,6 +256,46 @@
       <label class="form-label">Notas o Aclaraciones (opcional)</label>
       <textarea class="notes-input" id="fNota" placeholder="Aclaraciones de envío o detalles de peso especial..."></textarea>
     </div>
+    
+    <!-- METODO DE PAGO -->
+    <div class="form-section">
+      <label class="form-label">Método de Pago</label>
+      <div class="payment-toggle">
+        <button type="button" class="dtoggle-btn active" id="payCashBtn" onclick="setPaymentMethod('efectivo')">💵 Efectivo</button>
+        <button type="button" class="dtoggle-btn" id="payTransBtn" onclick="setPaymentMethod('transferencia')">📱 Transferencia</button>
+      </div>
+    </div>
+
+    <!-- EFECTIVO SUBSECTION -->
+    <div class="form-section" id="cashSection" style="display: block;">
+      <label class="form-label">¿Con cuánto vas a pagar? (Opcional)</label>
+      <input class="form-input" type="number" id="fVuelto" placeholder="Ej: 20000" oninput="calculateChange()">
+      <div id="changeResult" style="margin-top: 10px; font-size: 13px; font-weight: 700; color: #128C7E; display: none; background: rgba(37, 211, 102, 0.08); padding: 10px 14px; border-radius: 10px; border: 1.5px solid rgba(37, 211, 102, 0.2);">
+        💵 Su vuelto será de: <span id="changeAmount">$0</span>
+      </div>
+    </div>
+
+    <!-- TRANSFERENCIA SUBSECTION -->
+    <div class="form-section" id="transferSection" style="display: none;">
+      <div class="transfer-box">
+        <p class="transfer-box-title">Datos de Transferencia:</p>
+        <div class="transfer-data-list">
+          <div class="transfer-data-item"><strong>Titular:</strong> Victor Alejandro Jaureguina</div>
+          <div class="transfer-data-item"><strong>Banco:</strong> Ualá Bank S.A.U.</div>
+          <div class="transfer-copy-row">
+            <span><strong>Alias:</strong> <span id="aliasText" class="mono-text">punto25ale</span></span>
+            <button type="button" class="copy-btn" onclick="copyToClipboard('aliasText', 'Alias copiado!')">Copiar 📋</button>
+          </div>
+          <div class="transfer-copy-row">
+            <span><strong>CBU:</strong> <span id="cbuText" class="mono-text">3840200500000027216873</span></span>
+            <button type="button" class="copy-btn" onclick="copyToClipboard('cbuText', 'CBU copiado!')">Copiar 📋</button>
+          </div>
+        </div>
+        <p class="transfer-box-footer">
+          💡 Podés agendar nuestro número y compartir el comprobante por WhatsApp una vez finalizado el pedido.
+        </p>
+      </div>
+    </div>
     <button class="wa-btn" onclick="sendWhatsApp()">
       <span class="wa-icon">📲</span>
       Enviar Pedido por WhatsApp
@@ -325,6 +359,7 @@
       <div class="receipt-meta-row"><span>CLIENTE:</span><span id="recName">--</span></div>
       <div class="receipt-meta-row"><span>TELÉFONO:</span><span id="recTel">--</span></div>
       <div class="receipt-meta-row"><span>MODALIDAD:</span><span id="recDelivery">--</span></div>
+      <div class="receipt-meta-row"><span>METODO PAGO:</span><span id="recPayment">--</span></div>
       <div class="receipt-divider"></div>
     </div>
     <div class="receipt-items-container" id="recItems">
