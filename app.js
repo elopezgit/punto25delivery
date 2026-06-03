@@ -1030,7 +1030,7 @@ function copyToClipboard(elementId, successMsg) {
 }
 
 // ─── SEND WHATSAPP ORDER ──────────────────────────────────────────
-function sendWhatsApp() {
+async function sendWhatsApp() {
   const nombre = document.getElementById('fNombre').value.trim();
   const tel = document.getElementById('fTel').value.trim();
   const dir = document.getElementById('fDir').value.trim();
@@ -1068,6 +1068,7 @@ function sendWhatsApp() {
 
   // Compilar los items para la generación del ticket digital
   const receiptItems = [];
+  const itemsDetailText = [];
 
   Object.entries(cart).forEach(([key, qty]) => {
     const [idStr, opt] = key.split('-');
@@ -1086,6 +1087,7 @@ function sendWhatsApp() {
       }
 
       msg += `  • ${qty}x ${item.emoji} ${item.name}${optLabel} — ${formatPrice(price * qty)}\n`;
+      itemsDetailText.push(`${qty}x ${item.name}${optLabel}`);
       
       // Agregar al arreglo del recibo
       receiptItems.push({
@@ -1107,6 +1109,41 @@ function sendWhatsApp() {
   }
   
   msg += `\n📍 _Enviado desde el catálogo web de Punto 25_`;
+
+  // --- REGISTRO DE GOOGLE SHEETS ---
+  const sheetPayload = {
+    orderId: orderId,
+    nombre: nombre,
+    tel: tel,
+    deliveryMode: deliveryMode === 'delivery' ? '🛵 Delivery' : '🏃 Retiro',
+    direccion: deliveryMode === 'delivery' ? dir : 'Retiro en Local (Corrientes 664)',
+    paymentMethod: paymentMethod === 'efectivo' ? '💵 Efectivo' : '📱 Transferencia',
+    detalle: itemsDetailText.join('\n'),
+    total: total + envio,
+    pagoDetalle: paymentMethod === 'efectivo' ? (payWith > 0 ? `Paga con: ${formatPrice(payWith)} (Vuelto: ${formatPrice(payWith - finalTotal)})` : 'Pago exacto') : 'N/A',
+    notes: nota
+  };
+
+  if (GOOGLE_SHEETS_URL && GOOGLE_SHEETS_URL !== '' && !GOOGLE_SHEETS_URL.includes('Reemplazar')) {
+    showToast("⏳ Registrando pedido en planilla...");
+    try {
+      // Intentamos enviar al script de Google con timeout estricto de 2.2 segundos
+      await Promise.race([
+        fetch(GOOGLE_SHEETS_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Evita errores de política CORS en solicitudes cruzadas locales
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(sheetPayload)
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Google Sheets Timeout')), 2200))
+      ]);
+      console.log("Pedido registrado en Google Sheets");
+    } catch (err) {
+      console.warn("Fallo o timeout en Google Sheets. Continuando pedido a WhatsApp:", err);
+    }
+  }
 
   // Guardar datos del cliente de forma permanente
   saveClientData();
