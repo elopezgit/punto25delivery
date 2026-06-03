@@ -466,18 +466,44 @@ body.dark .section-label {
 
 /* Selector de peso táctil */
 .weight-selector {
-  display: flex; gap: 6px; margin: 4px 0 8px;
-  background: rgba(0, 58, 112, 0.04);
-  padding: 4px; border-radius: 10px; width: fit-content;
+  display: flex; gap: 6px; margin: 8px 0 8px;
+  background: #ffffff;
+  border: 1.5px solid var(--border);
+  padding: 4px; border-radius: 12px; width: 100%; max-width: 220px;
+  box-shadow: inset 0 2px 4px rgba(0, 58, 112, 0.05);
 }
 .weight-pill {
-  padding: 5px 12px; font-size: 14px; font-weight: 700; border-radius: 8px;
-  color: var(--text-light); cursor: pointer; transition: all 0.2s;
+  flex: 1; text-align: center;
+  padding: 8px 12px; font-size: 14.5px; font-weight: 800; border-radius: 8px;
+  color: var(--brand2); cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
+  background: rgba(0, 164, 228, 0.05);
+  border: 1px solid transparent;
+}
+.weight-pill:hover {
+  background: rgba(0, 164, 228, 0.12);
 }
 .weight-pill.active {
-  background: var(--brand2); color: white;
-  box-shadow: 0 2px 6px rgba(0, 58, 112, 0.15);
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
+  color: white;
+  border: 1px solid var(--gold);
+  box-shadow: 0 4px 10px rgba(0, 164, 228, 0.25);
+  transform: scale(1.05);
+}
+.item-weight-badge {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--brand);
+  background: rgba(0, 164, 228, 0.08);
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-left: 6px;
+  display: inline-block;
+  vertical-align: middle;
+}
+body.dark .item-weight-badge {
+  background: rgba(0, 164, 228, 0.15);
+  color: #a5d8ff;
 }
 
 .item-footer { display:flex; justify-content:space-between; align-items:center; margin-top: 4px; }
@@ -997,18 +1023,26 @@ body.dark .section-label {
 /* Selector de peso dentro del modal */
 .pm-weight-selector-modal {
   display: flex; gap: 8px;
-  background: rgba(0, 58, 112, 0.05);
-  padding: 4px; border-radius: 12px;
+  background: #ffffff;
+  border: 1.5px solid var(--border);
+  padding: 5px; border-radius: 14px;
+  box-shadow: inset 0 2px 4px rgba(0, 58, 112, 0.05);
 }
 .pm-weight-pill-modal {
   flex: 1; text-align: center; padding: 12px;
-  font-size: 16px; font-weight: 700; border-radius: 9px;
-  border: none; background: transparent; color: var(--text-light);
-  cursor: pointer; transition: all 0.2s;
+  font-size: 16px; font-weight: 800; border-radius: 10px;
+  border: 1px solid transparent; background: rgba(0, 164, 228, 0.05); color: var(--brand2);
+  cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pm-weight-pill-modal:hover {
+  background: rgba(0, 164, 228, 0.12);
 }
 .pm-weight-pill-modal.active {
-  background: var(--brand2); color: white;
-  box-shadow: 0 4px 10px rgba(0, 58, 112, 0.2);
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
+  color: white;
+  border: 1px solid var(--gold);
+  box-shadow: 0 5px 12px rgba(0, 164, 228, 0.25);
+  transform: scale(1.03);
 }
 
 /* Botón grande de agregar al carrito en el modal */
@@ -1097,8 +1131,22 @@ body.dark .menu-item:hover {
   box-shadow: 0 8px 20px rgba(0, 164, 228, 0.2);
   border-color: rgba(0, 164, 228, 0.35);
 }
-body.dark .weight-selector {
-  background: rgba(0, 164, 228, 0.08);
+body.dark .weight-selector, body.dark .pm-weight-selector-modal {
+  background: #0b0f19;
+  border-color: var(--border);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+body.dark .weight-pill, body.dark .pm-weight-pill-modal {
+  background: rgba(0, 164, 228, 0.1);
+  color: #e0f2fe;
+}
+body.dark .weight-pill:hover, body.dark .pm-weight-pill-modal:hover {
+  background: rgba(0, 164, 228, 0.2);
+}
+body.dark .weight-pill.active, body.dark .pm-weight-pill-modal.active {
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
+  color: white;
+  border-color: var(--gold);
 }
 body.dark .qty-btn {
   background: #2e3c54;
