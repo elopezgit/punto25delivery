@@ -1133,15 +1133,22 @@ async function sendWhatsApp() {
           method: 'POST',
           mode: 'no-cors', // Evita errores de política CORS en solicitudes cruzadas locales
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'text/plain' // Usar text/plain evita que el navegador bloquee/limpie la petición en no-cors
           },
           body: JSON.stringify(sheetPayload)
         }),
         new Promise((_, reject) => setTimeout(() => reject(new Error('Google Sheets Timeout')), 2200))
       ]);
-      console.log("Pedido registrado en Google Sheets");
+      console.log("Pedido registrado en Google Sheets (fetch)");
     } catch (err) {
-      console.warn("Fallo o timeout en Google Sheets. Continuando pedido a WhatsApp:", err);
+      console.warn("Fallo o timeout en Google Sheets via fetch. Usando fallback de formulario oculto:", err);
+      try {
+        sendDataViaHiddenForm(GOOGLE_SHEETS_URL, sheetPayload);
+        // Espera corta para asegurar que el navegador inicie el envío antes de ir a WhatsApp
+        await new Promise(resolve => setTimeout(resolve, 600));
+      } catch (formErr) {
+        console.error("Error en fallback de formulario:", formErr);
+      }
     }
   }
 
@@ -1765,5 +1772,46 @@ function stopCelebration() {
     canvas.style.display = 'none';
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+// Fallback robusto para registrar pedidos en Google Sheets usando un formulario oculto en un iframe oculto.
+// Este método es inmune a las restricciones de CORS y a los bloqueos de protocolos locales (como file://).
+function sendDataViaHiddenForm(url, payload) {
+  try {
+    const iframeName = 'hidden_iframe_' + Date.now();
+    
+    // Crear el iframe oculto
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    // Crear el formulario oculto
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    form.target = iframeName;
+    form.style.display = 'none';
+
+    // Inyectar el campo de datos serializado como JSON
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'data';
+    input.value = JSON.stringify(payload);
+    form.appendChild(input);
+
+    document.body.appendChild(form);
+    
+    // Enviar formulario de fondo
+    form.submit();
+
+    // Limpieza de elementos del DOM tras 4 segundos
+    setTimeout(() => {
+      document.body.removeChild(form);
+      document.body.removeChild(iframe);
+    }, 4000);
+  } catch (err) {
+    console.error("Error al enviar mediante formulario oculto:", err);
   }
 }
