@@ -191,44 +191,20 @@ function updateFreeShippingTracker(total) {
   }
 
   container.style.display = 'block';
-  const limit = 12000;
-  const percent = Math.min(100, (total / limit) * 100);
   
   const fill = document.getElementById('freeShippingFill');
   const msg = document.getElementById('freeShippingMsg');
   const suggestions = document.getElementById('freeShippingSuggestions');
-  const grid = document.getElementById('fsSugGrid');
+  const progressBg = container.querySelector('.fs-progress-bg');
 
-  if (fill) fill.style.width = percent + '%';
+  if (progressBg) progressBg.style.display = 'none';
+  if (suggestions) suggestions.style.display = 'none';
 
-  if (total >= limit) {
-    if (msg) msg.innerHTML = '¡Felicidades! 🎉 ¡Conseguiste <strong>Envío Gratis</strong>!';
-    if (suggestions) suggestions.style.display = 'none';
-  } else {
-    const remaining = limit - total;
-    if (msg) msg.innerHTML = `¡Estás a <strong>${formatPrice(remaining)}</strong> de conseguir <strong>Envío Gratis</strong>!`;
-    if (suggestions) suggestions.style.display = 'flex';
-    
-    // Sugerencias de productos complementarios baratos
-    const sugItems = [
-      { id: 45, name: 'Huevo Blanco #0', price: 350, emoji: '🥚' },
-      { id: 38, name: 'Milanesa de Soja', price: 1800, emoji: '🌱' },
-      { id: 41, name: 'Canastita Humita', price: 2500, emoji: '🥧' },
-      { id: 43, name: 'Papas McCain', price: 8000, emoji: '🍟' }
-    ];
-
-    if (grid) {
-      grid.innerHTML = sugItems.map(s => `
-        <div class="fs-sug-card" onclick="addQuickSuggestion(${s.id})">
-          <span style="font-size:14px">${s.emoji}</span>
-          <div style="display:flex;flex-direction:column;align-items:flex-start">
-            <span class="fs-sug-name">${s.name}</span>
-            <span class="fs-sug-price">${formatPrice(s.price)}</span>
-          </div>
-          <button class="fs-sug-add">+</button>
-        </div>
-      `).join('');
-    }
+  if (msg) {
+    msg.innerHTML = '🛵 ¡Envío <strong>100% Gratis</strong> sin monto mínimo!';
+    msg.style.textAlign = 'center';
+    msg.style.width = '100%';
+    msg.style.display = 'block';
   }
 }
 
@@ -954,14 +930,13 @@ function renderCartPanel() {
   });
   rows += '</div>';
 
-  const isFreeShipping = total >= 12000;
-  const envio = (deliveryMode === 'delivery' && !isFreeShipping) ? 1000 : 0;
+  const envio = 0;
   rows += `<div class="cart-subtotal"><span>Subtotal Productos</span><span>${formatPrice(total)}</span></div>`;
   rows += `<div class="cart-subtotal">
     <span>Envío ${deliveryMode === 'delivery' ? '🛵 (Barrio Norte)' : '🏃 Gratis (retiro local)'}</span>
-    <span>${envio ? formatPrice(envio) : (deliveryMode === 'delivery' && isFreeShipping) ? '¡Gratis! 🎉' : '$0'}</span>
+    <span>¡Gratis! 🎉</span>
   </div>`;
-  rows += `<div class="cart-total"><span>Total Final</span><span>${formatPrice(total + envio)}</span></div>`;
+  rows += `<div class="cart-total"><span>Total Final</span><span>${formatPrice(total)}</span></div>`;
   rows += '<div style="height:10px"></div>';
 
   content.innerHTML = rows;
@@ -1004,8 +979,7 @@ function setPaymentMethod(method) {
 
 function calculateChange() {
   const totalObj = getTotals();
-  const isFreeShipping = totalObj.total >= 12000;
-  const shipping = (deliveryMode === 'delivery' && !isFreeShipping) ? 1000 : 0;
+  const shipping = 0;
   const finalTotal = totalObj.total + shipping;
 
   const inputEl = document.getElementById('fVuelto');
@@ -1064,8 +1038,7 @@ function sendWhatsApp() {
   if (deliveryMode === 'delivery' && !dir) { showToast('⚠️ Ingresá tu dirección de entrega'); return; }
 
   const { total } = getTotals();
-  const isFreeShipping = total >= 12000;
-  const envio = (deliveryMode === 'delivery' && !isFreeShipping) ? 1000 : 0;
+  const envio = 0;
   const waNumber = '549' + WA_NUMBERS[selectedWaIdx]; // Código país + número
   const orderId = generateOrderId();
 
@@ -1121,7 +1094,7 @@ function sendWhatsApp() {
   });
 
   if (deliveryMode === 'delivery') {
-    msg += `\n🛵 *Envío:* ${envio ? formatPrice(envio) : '¡Gratis! 🎉'}\n`;
+    msg += `\n🛵 *Envío:* ¡Gratis! 🎉\n`;
   }
   msg += `💰 *TOTAL FINAL: ${formatPrice(total + envio)}*\n`;
   
@@ -1319,7 +1292,7 @@ function openReceiptModal(orderId, customerName, phone, isDelivery, itemsList, s
   `).join('');
   
   document.getElementById('recSubtotal').textContent = formatPrice(subtotal);
-  document.getElementById('recShipping').textContent = formatPrice(shippingCost);
+  document.getElementById('recShipping').textContent = shippingCost === 0 ? '¡Gratis! 🎉' : formatPrice(shippingCost);
   document.getElementById('recTotal').textContent = formatPrice(subtotal + shippingCost);
   
   if (overlay && modal) {
