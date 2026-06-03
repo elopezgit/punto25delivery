@@ -798,3 +798,10 @@ const MENU = [
     rating: 4.8
   }
 ];
+
+// Ajustar dinámicamente el precio de medio kilo para que sea exactamente la mitad del precio del kilo
+MENU.forEach(item => {
+  if (item.price && (item.unitType === 'peso' || item.unitType === 'mixto')) {
+    item.priceHalf = Math.round(item.price / 2);
+  }
+});
