@@ -937,7 +937,7 @@ function renderCartPanel() {
   const envio = 0;
   rows += `<div class="cart-subtotal"><span>Subtotal Productos</span><span>${formatPrice(total)}</span></div>`;
   rows += `<div class="cart-subtotal">
-    <span>Envío ${deliveryMode === 'delivery' ? '🛵 (Barrio Norte)' : '🏃 Gratis (retiro local)'}</span>
+    <span>Envío ${deliveryMode === 'delivery' ? '🛵 Gratis' : '🏃 Retiro en Local'}</span>
     <span>¡Gratis! 🎉</span>
   </div>`;
   rows += `<div class="cart-total"><span>Total Final</span><span>${formatPrice(total)}</span></div>`;
