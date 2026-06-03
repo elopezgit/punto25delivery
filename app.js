@@ -1126,28 +1126,40 @@ async function sendWhatsApp() {
 
   if (GOOGLE_SHEETS_URL && GOOGLE_SHEETS_URL !== '' && !GOOGLE_SHEETS_URL.includes('Reemplazar')) {
     showToast("⏳ Registrando pedido en planilla...");
-    try {
-      // Intentamos enviar al script de Google con timeout estricto de 2.2 segundos
-      await Promise.race([
-        fetch(GOOGLE_SHEETS_URL, {
-          method: 'POST',
-          mode: 'no-cors', // Evita errores de política CORS en solicitudes cruzadas locales
-          headers: {
-            'Content-Type': 'text/plain' // Usar text/plain evita que el navegador bloquee/limpie la petición en no-cors
-          },
-          body: JSON.stringify(sheetPayload)
-        }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Google Sheets Timeout')), 2200))
-      ]);
-      console.log("Pedido registrado en Google Sheets (fetch)");
-    } catch (err) {
-      console.warn("Fallo o timeout en Google Sheets via fetch. Usando fallback de formulario oculto:", err);
+    
+    // Si se corre localmente como archivo (file://), fetch se bloquea por CORS.
+    // Usamos el formulario oculto directamente en ese caso. Para HTTP/HTTPS usamos fetch directo.
+    const isLocalFile = window.location.protocol === 'file:';
+    
+    if (isLocalFile) {
+      console.log("Detectado protocolo file://. Registrando mediante formulario oculto.");
       try {
         sendDataViaHiddenForm(GOOGLE_SHEETS_URL, sheetPayload);
-        // Espera corta para asegurar que el navegador inicie el envío antes de ir a WhatsApp
-        await new Promise(resolve => setTimeout(resolve, 600));
+        // Espera de 800ms para asegurar que el navegador envíe el formulario antes de ir a WhatsApp
+        await new Promise(resolve => setTimeout(resolve, 800));
       } catch (formErr) {
-        console.error("Error en fallback de formulario:", formErr);
+        console.error("Error en envío por formulario oculto:", formErr);
+      }
+    } else {
+      console.log("Detectado protocolo web (HTTP/HTTPS). Registrando mediante fetch.");
+      try {
+        await Promise.race([
+          fetch(GOOGLE_SHEETS_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Evita errores de política CORS en solicitudes cruzadas locales
+            headers: {
+              'Content-Type': 'text/plain' // text/plain evita preflight CORS
+            },
+            body: JSON.stringify(sheetPayload)
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Google Sheets Timeout')), 2200))
+        ]);
+        console.log("Pedido registrado en Google Sheets (fetch)");
+      } catch (err) {
+        // Nota: en no-cors, si Google redirige la petición, el navegador puede tirar un error de CORS
+        // aunque el servidor de Google ya haya recibido el POST y guardado la fila.
+        // No llamamos al fallback aquí para evitar que se registre dos veces si la primera ya llegó.
+        console.warn("Fallo o timeout en Google Sheets via fetch:", err);
       }
     }
   }
