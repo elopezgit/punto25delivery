@@ -3,7 +3,7 @@ const WA_NUMBERS = ['3813253754', '3813980410']; // Celulares del folleto
 const INSTAGRAM_USER = 'punto25delivery';
 const ADDRESS_TEXT = 'Corrientes 664, Barrio Norte';
 // Pegar aquí la URL del Web App obtenida al desplegar el script en Google Apps Script:
-const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzQnS20M94u1k395uX6W9yZ9O0fR5Xf6gE9e-XF1n2M4b9y7n2s-xF1n2/exec'; // Reemplazar por la URL real obtenida al desplegar como Web App
+const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxPBn2bWx4mr8Csru-FLmcejJaqq_vQwDmvK9u_4snMTs09vP7jrok7LNw5IFnK2UStSw/exec'; // URL real provista por el cliente
 
 const MENU = [
   // ── COLUMNA IZQUIERDA: REBOZADOS Y GRANJA DE POLLO ──────────────────────────
