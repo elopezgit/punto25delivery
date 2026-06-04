@@ -479,8 +479,10 @@ body {
 
 .brand-hero-socials {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  flex-wrap: wrap;
+  align-items: flex-start;
+  margin-top: 4px;
 }
 
 .hero-social-tag {
@@ -510,7 +512,7 @@ body {
 }
 
 .hero-promo-badge {
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--brand-dark);
   background: linear-gradient(135deg, var(--gold) 0%, #ffa500 100%);
@@ -523,7 +525,8 @@ body {
   animation: pulsePromo 2s infinite ease-in-out;
   border: 1px solid rgba(255, 255, 255, 0.4);
   text-shadow: none;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.25;
 }
 
 @keyframes pulsePromo {
