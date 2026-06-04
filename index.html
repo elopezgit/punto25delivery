@@ -1,400 +1,414 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>🐔 Punto 25 Delivery - Granja, Rebozados y Congelados</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>🐔 Punto 25 Delivery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
-<!-- SPLASH SCREEN -->
-<div id="splash">
-  <div class="sp-logo-mockup">
-    <div class="sp-logo-text-1">PUNTO</div>
-    <div class="sp-logo-text-2">25</div>
-    <div class="sp-logo-text-3">Delivery</div>
+  <!-- SPLASH SCREEN -->
+  <div id="splash">
+    <div class="sp-logo-mockup">
+      <div class="sp-logo-text-1">PUNTO</div>
+      <div class="sp-logo-text-2">25</div>
+      <div class="sp-logo-text-3">Delivery</div>
+    </div>
+    <div class="sp-name">Punto <span>25</span> Delivery</div>
+    <div class="sp-tagline">Frescura y Calidad a tu Mesa</div>
+    <div class="sp-stars">⭐⭐⭐⭐⭐</div>
+    <div class="sp-loader">
+      <div class="sp-loader-bar"></div>
+    </div>
   </div>
-  <div class="sp-name">Punto <span>25</span> Delivery</div>
-  <div class="sp-tagline">Frescura y Calidad a tu Mesa</div>
-  <div class="sp-stars">⭐⭐⭐⭐⭐</div>
-  <div class="sp-loader"><div class="sp-loader-bar"></div></div>
-</div>
 
-<!-- APP MAIN CONTAINER -->
-<div id="app">
-  <div class="patriotic-bar"></div>
+  <!-- APP MAIN CONTAINER -->
+  <div id="app">
+    <div class="patriotic-bar"></div>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-inner">
-      <div class="brand-block">
-        <div class="brand-greeting" id="storeStatusGreeting">
-          <span class="status-indicator-dot open"></span>
-          <span id="storeStatusText">Abierto · Pedidos en Línea</span>
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-inner">
+        <div class="brand-block">
+          <div class="brand-greeting" id="storeStatusGreeting">
+            <span class="status-indicator-dot open"></span>
+            <span id="storeStatusText">Abierto · Pedidos en Línea</span>
+          </div>
+          <div class="brand-name">Punto <span>25</span> Delivery</div>
         </div>
-        <div class="brand-name">Punto <span>25</span> Delivery</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Cambiar Tema">🌙</button>
+          <button class="cart-fab" onclick="openCart()" id="cartFab">
+            🛒
+            <div class="cart-count" id="cartCount">0</div>
+          </button>
+        </div>
       </div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Cambiar Tema">🌙</button>
-        <button class="cart-fab" onclick="openCart()" id="cartFab">
-          🛒
-          <div class="cart-count" id="cartCount">0</div>
-        </button>
+      <div class="search-bar">
+        <span>🔍</span>
+        <input type="text" placeholder="Buscá patitas, nuggets, merluza..." id="searchInput" oninput="filterMenu()">
+        <button class="voice-btn" id="voiceBtn" onclick="startVoiceSearch(event)" title="Buscar por voz">🎙️</button>
       </div>
+      <div class="search-suggestions" id="searchSuggestions" style="display:none"></div>
     </div>
-    <div class="search-bar">
-      <span>🔍</span>
-      <input type="text" placeholder="Buscá patitas, nuggets, merluza..." id="searchInput" oninput="filterMenu()">
-      <button class="voice-btn" id="voiceBtn" onclick="startVoiceSearch(event)" title="Buscar por voz">🎙️</button>
-    </div>
-    <div class="search-suggestions" id="searchSuggestions" style="display:none"></div>
-  </div>
 
-  <!-- BRAND HERO INFO BANNER -->
-  <div class="brand-hero" id="fsHero">
-    <div class="brand-hero-logo">
-      <div class="brand-hero-logo-t1">PUNTO</div>
-      <div class="brand-hero-logo-t2">25</div>
-      <div class="brand-hero-logo-t3">Delivery</div>
+    <!-- BRAND HERO INFO BANNER -->
+    <div class="brand-hero" id="fsHero">
+      <div class="brand-hero-logo">
+        <div class="brand-hero-logo-t1">PUNTO</div>
+        <div class="brand-hero-logo-t2">25</div>
+        <div class="brand-hero-logo-t3">Delivery</div>
+      </div>
+      <div class="brand-hero-info">
+        <div class="brand-hero-title">Punto 25 Delivery</div>
+        <div class="brand-hero-stars">⭐⭐⭐⭐⭐</div>
+        <div class="brand-hero-address">📍 Corrientes 664 · Barrio Norte</div>
+        <div class="brand-hero-socials">
+          <a href="https://wa.me/5493813253754" target="_blank" class="hero-social-tag wa">
+            📲 3813253754
+          </a>
+          <span class="hero-promo-badge">
+            🛵 Envíos 100% Gratis·SIN MINIMO DE COMPRA!
+          </span>
+        </div>
+      </div>
     </div>
-    <div class="brand-hero-info">
-      <div class="brand-hero-title">Punto 25 Delivery</div>
-      <div class="brand-hero-stars">⭐⭐⭐⭐⭐</div>
-      <div class="brand-hero-address">📍 Corrientes 664 · Barrio Norte</div>
-      <div class="brand-hero-socials">
-        <a href="https://wa.me/5493813253754" target="_blank" class="hero-social-tag wa">
-          📲 3813253754
+
+    <!-- HISTORY BANNER (REPETIR ÚLTIMO PEDIDO) -->
+    <div class="history-banner" id="historyBanner" style="display: none;">
+      <div class="hb-content">
+        <span class="hb-icon">♻️</span>
+        <div class="hb-info">
+          <div class="hb-title">¿Querés repetir tu última compra?</div>
+          <div class="hb-desc" id="historyOrderDesc">Cargando datos...</div>
+        </div>
+      </div>
+      <button class="hb-btn" onclick="loadLastOrder(event)">Repetir 🛒</button>
+    </div>
+
+    <!-- PROMOS -->
+    <div class="promo-wrap" id="fsPromo">
+      <div class="promo-scroll" id="promoScroll">
+        <div class="promo-card p1">
+          <div class="promo-badge">⚡ ENVÍO 100% GRATIS</div>
+          <div class="promo-title">Granja y Congelados<br>a Domicilio</div>
+          <div class="promo-sub">¡Envío gratis sin mínimo!</div>
+          <div class="promo-emoji">🛵</div>
+        </div>
+        <div class="promo-card p2">
+          <div class="promo-badge">🍗 OFERTA DEL MES</div>
+          <div class="promo-title">Los Rebozados<br>Más Ricos</div>
+          <div class="promo-sub">¡Llevando por Kilo ahorrás siempre!</div>
+          <div class="promo-emoji">🍗</div>
+        </div>
+        <div class="promo-card p3">
+          <div class="promo-badge">🐟 MAR Y RÍO</div>
+          <div class="promo-title">Filet de Merluza<br>Fresco y Despinado</div>
+          <div class="promo-sub">Crocantes, rabas y medallones listos</div>
+          <div class="promo-emoji">🐟</div>
+        </div>
+      </div>
+      <div class="promo-dots" id="promoDots">
+        <div class="dot active" onclick="scrollToPromo(0)"></div>
+        <div class="dot" onclick="scrollToPromo(1)"></div>
+        <div class="dot" onclick="scrollToPromo(2)"></div>
+      </div>
+    </div>
+
+    <!-- CATEGORIES (Módulos Cuadrados Estilo PedidoYa) -->
+    <div class="cats-wrap" id="fsCats">
+      <div class="section-label">📂 Categorías</div>
+      <div class="cats-scroll" id="catScroll">
+        <div class="cat-card active" onclick="filterCat('todos')" data-cat="todos">
+          <div class="cat-card-icon">🍽️</div>
+          <div class="cat-card-name">Todos</div>
+        </div>
+        <div class="cat-card" onclick="filterCat('pollo-rebozado')" data-cat="pollo-rebozado">
+          <div class="cat-card-icon">🍗</div>
+          <div class="cat-card-name">Rebozados Pollo</div>
+        </div>
+        <div class="cat-card" onclick="filterCat('pollo-granja')" data-cat="pollo-granja">
+          <div class="cat-card-icon">🐔</div>
+          <div class="cat-card-name">Granja & Cortes</div>
+        </div>
+        <div class="cat-card" onclick="filterCat('pescados-mariscos')" data-cat="pescados-mariscos">
+          <div class="cat-card-icon">🐟</div>
+          <div class="cat-card-name">Mar y Río</div>
+        </div>
+        <div class="cat-card" onclick="filterCat('veggie-soja')" data-cat="veggie-soja">
+          <div class="cat-card-icon">🌿</div>
+          <div class="cat-card-name">Veggie & Soja</div>
+        </div>
+        <div class="cat-card" onclick="filterCat('bocados-papas')" data-cat="bocados-papas">
+          <div class="cat-card-icon">🍟</div>
+          <div class="cat-card-name">Bocados & Papas</div>
+        </div>
+        <div class="cat-card" onclick="filterCat('almacen-huevos')" data-cat="almacen-huevos">
+          <div class="cat-card-icon">🥚</div>
+          <div class="cat-card-name">Almacén</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- MENU LIST -->
+    <div class="menu-wrap" id="fsMenu">
+      <!-- QUICK TAG FILTERS (Filtros por Tags Estilo PedidoYa) -->
+      <div class="quick-tags-wrap" id="quickTags">
+        <button class="tag-pill" onclick="filterMenuByTag('popular')" data-tag="popular">🔥 Populares</button>
+        <button class="tag-pill" onclick="filterMenuByTag('relleno')" data-tag="relleno">🧀 Rellenos</button>
+        <button class="tag-pill" onclick="filterMenuByTag('saludable')" data-tag="saludable">🥗 Saludable</button>
+        <button class="tag-pill" onclick="filterMenuByTag('niños')" data-tag="niños">👶 Infantil</button>
+      </div>
+      <div class="section-label" id="menuTitle">🍽️ Catálogo Completo</div>
+      <div class="menu-list" id="menuList"></div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="app-footer fade-section" id="fsFooter">
+      <div class="footer-logo">Punto 25 Delivery</div>
+      <div class="footer-text">Llevamos los mejores rebozados, productos de granja, pescados y congelados directamente a
+        tu cocina con la frescura que mereces.</div>
+      <div class="footer-address">
+        <span>📍 Nuestra Dirección</span>
+        Corrientes 664, Barrio Norte<br>San Miguel de Tucumán
+      </div>
+      <div class="footer-buttons">
+        <a href="https://wa.me/5493813253754" target="_blank" class="footer-btn wa">
+          💬 WhatsApp 1
         </a>
-        <span class="hero-promo-badge">
-          🛵 Envíos 100% Gratis · Sin Mínimo
-        </span>
       </div>
     </div>
+
+    <div style="height:20px"></div>
   </div>
 
-  <!-- HISTORY BANNER (REPETIR ÚLTIMO PEDIDO) -->
-  <div class="history-banner" id="historyBanner" style="display: none;">
-    <div class="hb-content">
-      <span class="hb-icon">♻️</span>
-      <div class="hb-info">
-        <div class="hb-title">¿Querés repetir tu última compra?</div>
-        <div class="hb-desc" id="historyOrderDesc">Cargando datos...</div>
+  <!-- BOTTOM STICKY BAR -->
+  <div class="bottom-bar">
+    <button class="order-btn" id="orderBtn" onclick="openCart()">
+      <div class="order-btn-left">
+        <div class="order-btn-count" id="btnCount">0</div>
+        <span>Ver mi Pedido</span>
       </div>
-    </div>
-    <button class="hb-btn" onclick="loadLastOrder(event)">Repetir 🛒</button>
-  </div>
-
-  <!-- PROMOS -->
-  <div class="promo-wrap" id="fsPromo">
-    <div class="promo-scroll" id="promoScroll">
-      <div class="promo-card p1">
-        <div class="promo-badge">⚡ ENVÍO 100% GRATIS</div>
-        <div class="promo-title">Granja y Congelados<br>a Domicilio</div>
-        <div class="promo-sub">¡Envío gratis sin mínimo!</div>
-        <div class="promo-emoji">🛵</div>
-      </div>
-      <div class="promo-card p2">
-        <div class="promo-badge">🍗 OFERTA DEL MES</div>
-        <div class="promo-title">Los Rebozados<br>Más Ricos</div>
-        <div class="promo-sub">¡Llevando por Kilo ahorrás siempre!</div>
-        <div class="promo-emoji">🍗</div>
-      </div>
-      <div class="promo-card p3">
-        <div class="promo-badge">🐟 MAR Y RÍO</div>
-        <div class="promo-title">Filet de Merluza<br>Fresco y Despinado</div>
-        <div class="promo-sub">Crocantes, rabas y medallones listos</div>
-        <div class="promo-emoji">🐟</div>
-      </div>
-    </div>
-    <div class="promo-dots" id="promoDots">
-      <div class="dot active" onclick="scrollToPromo(0)"></div>
-      <div class="dot" onclick="scrollToPromo(1)"></div>
-      <div class="dot" onclick="scrollToPromo(2)"></div>
-    </div>
-  </div>
-
-  <!-- CATEGORIES (Módulos Cuadrados Estilo PedidoYa) -->
-  <div class="cats-wrap" id="fsCats">
-    <div class="section-label">📂 Categorías</div>
-    <div class="cats-scroll" id="catScroll">
-      <div class="cat-card active" onclick="filterCat('todos')" data-cat="todos">
-        <div class="cat-card-icon">🍽️</div>
-        <div class="cat-card-name">Todos</div>
-      </div>
-      <div class="cat-card" onclick="filterCat('pollo-rebozado')" data-cat="pollo-rebozado">
-        <div class="cat-card-icon">🍗</div>
-        <div class="cat-card-name">Rebozados Pollo</div>
-      </div>
-      <div class="cat-card" onclick="filterCat('pollo-granja')" data-cat="pollo-granja">
-        <div class="cat-card-icon">🐔</div>
-        <div class="cat-card-name">Granja & Cortes</div>
-      </div>
-      <div class="cat-card" onclick="filterCat('pescados-mariscos')" data-cat="pescados-mariscos">
-        <div class="cat-card-icon">🐟</div>
-        <div class="cat-card-name">Mar y Río</div>
-      </div>
-      <div class="cat-card" onclick="filterCat('veggie-soja')" data-cat="veggie-soja">
-        <div class="cat-card-icon">🌿</div>
-        <div class="cat-card-name">Veggie & Soja</div>
-      </div>
-      <div class="cat-card" onclick="filterCat('bocados-papas')" data-cat="bocados-papas">
-        <div class="cat-card-icon">🍟</div>
-        <div class="cat-card-name">Bocados & Papas</div>
-      </div>
-      <div class="cat-card" onclick="filterCat('almacen-huevos')" data-cat="almacen-huevos">
-        <div class="cat-card-icon">🥚</div>
-        <div class="cat-card-name">Almacén</div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- MENU LIST -->
-  <div class="menu-wrap" id="fsMenu">
-    <!-- QUICK TAG FILTERS (Filtros por Tags Estilo PedidoYa) -->
-    <div class="quick-tags-wrap" id="quickTags">
-      <button class="tag-pill" onclick="filterMenuByTag('popular')" data-tag="popular">🔥 Populares</button>
-      <button class="tag-pill" onclick="filterMenuByTag('relleno')" data-tag="relleno">🧀 Rellenos</button>
-      <button class="tag-pill" onclick="filterMenuByTag('saludable')" data-tag="saludable">🥗 Saludable</button>
-      <button class="tag-pill" onclick="filterMenuByTag('niños')" data-tag="niños">👶 Infantil</button>
-    </div>
-    <div class="section-label" id="menuTitle">🍽️ Catálogo Completo</div>
-    <div class="menu-list" id="menuList"></div>
-  </div>
-
-  <!-- FOOTER -->
-  <div class="app-footer fade-section" id="fsFooter">
-    <div class="footer-logo">Punto 25 Delivery</div>
-    <div class="footer-text">Llevamos los mejores rebozados, productos de granja, pescados y congelados directamente a tu cocina con la frescura que mereces.</div>
-    <div class="footer-address">
-      <span>📍 Nuestra Dirección</span>
-      Corrientes 664, Barrio Norte<br>San Miguel de Tucumán
-    </div>
-    <div class="footer-buttons">
-      <a href="https://wa.me/5493813253754" target="_blank" class="footer-btn wa">
-        💬 WhatsApp 1
-      </a>
-    </div>
-  </div>
-
-  <div style="height:20px"></div>
-</div>
-
-<!-- BOTTOM STICKY BAR -->
-<div class="bottom-bar">
-  <button class="order-btn" id="orderBtn" onclick="openCart()">
-    <div class="order-btn-left">
-      <div class="order-btn-count" id="btnCount">0</div>
-      <span>Ver mi Pedido</span>
-    </div>
-    <div class="order-btn-total" id="btnTotal">$0</div>
-  </button>
-</div>
-
-<!-- CART PANEL PANEL -->
-<div class="panel-overlay" id="panelOverlay" onclick="closeCart()"></div>
-<div class="panel" id="cartPanel">
-  <div class="panel-handle"></div>
-  <div class="panel-title">
-    Tu Pedido 🛒
-    <button class="panel-close" onclick="closeCart()">✕</button>
-  </div>
-
-  <div class="delivery-toggle">
-    <button class="dtoggle-btn active" id="dBtn1" onclick="setDelivery('delivery')">🛵 Delivery</button>
-    <button class="dtoggle-btn" id="dBtn2" onclick="setDelivery('takeaway')">🏃 Retiro</button>
-  </div>
-
-  <!-- FREE SHIPPING PROGRESS BAR & KILO OPTIMIZER -->
-  <div class="free-shipping-container" id="freeShippingContainer">
-    <div class="fs-text-wrap">
-      <span class="fs-status-msg" id="freeShippingMsg">🛵 ¡Envío 100% Gratis sin monto mínimo!</span>
-    </div>
-    <div class="fs-progress-bg" style="display: none;">
-      <div class="fs-progress-fill" id="freeShippingFill" style="width: 0%;">
-        <span class="fs-progress-icon">🛵</span>
-      </div>
-    </div>
-    <div class="fs-suggestions" id="freeShippingSuggestions" style="display: none;">
-      <span class="fs-sug-label">💡 Sumá al carrito para no pagar envío:</span>
-      <div class="fs-sug-grid" id="fsSugGrid"></div>
-    </div>
-  </div>
-
-  <div class="optimizer-alert" id="optimizerAlert" style="display: none;"></div>
-
-  <div id="cartContent"></div>
-
-  <div id="cartForm" style="display:none">
-    
-    <!-- WHATSAPP NUMBER SELECTOR -->
-    <div class="form-section">
-      <label class="form-label">¿A qué número enviar el pedido?</label>
-      <div class="wa-channel-grid">
-        <div class="wa-channel-card active" id="waCard0" onclick="selectWaChannel(0)">
-          <span class="c-icon">📲</span>
-          <span class="c-name">Celular Principal</span>
-          <span class="c-phone">381 325-3754</span>
-        </div>
-        <div class="wa-channel-card" id="waCard1" onclick="selectWaChannel(1)">
-          <span class="c-icon">📲</span>
-          <span class="c-name">Celular Alternativo</span>
-          <span class="c-phone">381 398-0410</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <label class="form-label">Tu Nombre</label>
-      <input class="form-input" type="text" id="fNombre" placeholder="Juan García">
-    </div>
-    <div class="form-section">
-      <label class="form-label">Teléfono de Contacto</label>
-      <input class="form-input" type="tel" id="fTel" placeholder="381 123-4567">
-    </div>
-    <div class="form-section" id="addressSection">
-      <label class="form-label">Dirección de Entrega</label>
-      <input class="form-input" type="text" id="fDir" placeholder="Corrientes 500, piso 1 dpto A">
-    </div>
-    <div class="form-section">
-      <label class="form-label">Notas o Aclaraciones (opcional)</label>
-      <textarea class="notes-input" id="fNota" placeholder="Aclaraciones de envío o detalles de peso especial..."></textarea>
-    </div>
-    
-    <!-- METODO DE PAGO -->
-    <div class="form-section">
-      <label class="form-label">Método de Pago</label>
-      <div class="payment-toggle">
-        <button type="button" class="dtoggle-btn active" id="payCashBtn" onclick="setPaymentMethod('efectivo')">💵 Efectivo</button>
-        <button type="button" class="dtoggle-btn" id="payTransBtn" onclick="setPaymentMethod('transferencia')">📱 Transferencia</button>
-      </div>
-    </div>
-
-    <!-- EFECTIVO SUBSECTION -->
-    <div class="form-section" id="cashSection" style="display: block;">
-      <label class="form-label">¿Con cuánto vas a pagar? (Opcional)</label>
-      <input class="form-input" type="number" id="fVuelto" placeholder="Ej: 20000" oninput="calculateChange()">
-      <div id="changeResult" style="margin-top: 10px; font-size: 15px; font-weight: 700; color: #128C7E; display: none; background: rgba(37, 211, 102, 0.08); padding: 10px 14px; border-radius: 10px; border: 1.5px solid rgba(37, 211, 102, 0.2);">
-        💵 Su vuelto será de: <span id="changeAmount">$0</span>
-      </div>
-    </div>
-
-    <!-- TRANSFERENCIA SUBSECTION -->
-    <div class="form-section" id="transferSection" style="display: none;">
-      <div class="transfer-box">
-        <p class="transfer-box-title">Datos de Transferencia:</p>
-        <div class="transfer-data-list">
-          <div class="transfer-data-item"><strong>Titular:</strong> Victor Alejandro Jaureguina</div>
-          <div class="transfer-data-item"><strong>Banco:</strong> Ualá Bank S.A.U.</div>
-          <div class="transfer-copy-row">
-            <span><strong>Alias:</strong> <span id="aliasText" class="mono-text">punto25ale</span></span>
-            <button type="button" class="copy-btn" onclick="copyToClipboard('aliasText', 'Alias copiado!')">Copiar 📋</button>
-          </div>
-          <div class="transfer-copy-row">
-            <span><strong>CBU:</strong> <span id="cbuText" class="mono-text">3840200500000027216873</span></span>
-            <button type="button" class="copy-btn" onclick="copyToClipboard('cbuText', 'CBU copiado!')">Copiar 📋</button>
-          </div>
-        </div>
-        <p class="transfer-box-footer">
-          💡 Podés agendar nuestro número y compartir el comprobante por WhatsApp una vez finalizado el pedido.
-        </p>
-      </div>
-    </div>
-    <button class="wa-btn" onclick="sendWhatsApp()">
-      <span class="wa-icon">📲</span>
-      Enviar Pedido por WhatsApp
+      <div class="order-btn-total" id="btnTotal">$0</div>
     </button>
   </div>
-</div>
 
-<!-- PRODUCT DETAIL MODAL -->
-<div class="product-modal-overlay" id="productModalOverlay" onclick="closeProductModal()"></div>
-<div class="product-modal" id="productModal">
-  <button class="pm-close-btn" onclick="closeProductModal()">✕</button>
-  <div class="pm-image-wrap" id="pmImageWrap"></div>
-  <div class="pm-content-wrap">
-    <div class="pm-header">
-      <span class="pm-category" id="pmCategory">CATEGORÍA</span>
-      <h2 class="pm-title" id="pmTitle">Nombre del Producto</h2>
-    </div>
-    <div class="pm-rating-row">
-      <span class="pm-stars">★★★★★</span>
-      <span class="pm-rating-value" id="pmRating">5.0</span>
-    </div>
-    <p class="pm-desc" id="pmDesc">Descripción detallada del producto...</p>
-    
-    <div class="pm-info-section" id="pmIngredientsSection">
-      <span class="pm-section-title">🌿 Ingredientes Selección</span>
-      <p class="pm-ingredients" id="pmIngredients">Ingredientes...</p>
-    </div>
-    
-    <div class="pm-info-section" id="pmPrepSection">
-      <span class="pm-section-title">⏱️ Preparación & Conservación</span>
-      <p class="pm-prep" id="pmPrep">Preparación...</p>
-    </div>
-    
-    <div class="pm-price-row">
-      <span class="pm-price-label">Precio Unitario</span>
-      <span class="pm-price-value" id="pmPrice">$--</span>
+  <!-- CART PANEL PANEL -->
+  <div class="panel-overlay" id="panelOverlay" onclick="closeCart()"></div>
+  <div class="panel" id="cartPanel">
+    <div class="panel-handle"></div>
+    <div class="panel-title">
+      Tu Pedido 🛒
+      <button class="panel-close" onclick="closeCart()">✕</button>
     </div>
 
-    <div class="pm-actions" id="pmActions">
-      <!-- Botones de compra rápida inyectados por JS -->
+    <div class="delivery-toggle">
+      <button class="dtoggle-btn active" id="dBtn1" onclick="setDelivery('delivery')">🛵 Delivery</button>
+      <button class="dtoggle-btn" id="dBtn2" onclick="setDelivery('takeaway')">🏃 Retiro</button>
     </div>
-    
-    <button class="pm-back-btn" onclick="closeProductModal()">Volver al Catálogo 🐔</button>
+
+    <!-- FREE SHIPPING PROGRESS BAR & KILO OPTIMIZER -->
+    <div class="free-shipping-container" id="freeShippingContainer">
+      <div class="fs-text-wrap">
+        <span class="fs-status-msg" id="freeShippingMsg">🛵 ¡Envío 100% Gratis sin monto mínimo!</span>
+      </div>
+      <div class="fs-progress-bg" style="display: none;">
+        <div class="fs-progress-fill" id="freeShippingFill" style="width: 0%;">
+          <span class="fs-progress-icon">🛵</span>
+        </div>
+      </div>
+      <div class="fs-suggestions" id="freeShippingSuggestions" style="display: none;">
+        <span class="fs-sug-label">💡 Sumá al carrito para no pagar envío:</span>
+        <div class="fs-sug-grid" id="fsSugGrid"></div>
+      </div>
+    </div>
+
+    <div class="optimizer-alert" id="optimizerAlert" style="display: none;"></div>
+
+    <div id="cartContent"></div>
+
+    <div id="cartForm" style="display:none">
+
+      <!-- WHATSAPP NUMBER SELECTOR -->
+      <div class="form-section">
+        <label class="form-label">¿A qué número enviar el pedido?</label>
+        <div class="wa-channel-grid">
+          <div class="wa-channel-card active" id="waCard0" onclick="selectWaChannel(0)">
+            <span class="c-icon">📲</span>
+            <span class="c-name">Celular Principal</span>
+            <span class="c-phone">381 325-3754</span>
+          </div>
+          <div class="wa-channel-card" id="waCard1" onclick="selectWaChannel(1)">
+            <span class="c-icon">📲</span>
+            <span class="c-name">Celular Alternativo</span>
+            <span class="c-phone">381 398-0410</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Tu Nombre</label>
+        <input class="form-input" type="text" id="fNombre" placeholder="Juan García">
+      </div>
+      <div class="form-section">
+        <label class="form-label">Teléfono de Contacto</label>
+        <input class="form-input" type="tel" id="fTel" placeholder="381 123-4567">
+      </div>
+      <div class="form-section" id="addressSection">
+        <label class="form-label">Dirección de Entrega</label>
+        <input class="form-input" type="text" id="fDir" placeholder="Corrientes 500, piso 1 dpto A">
+      </div>
+      <div class="form-section">
+        <label class="form-label">Notas o Aclaraciones (opcional)</label>
+        <textarea class="notes-input" id="fNota"
+          placeholder="Aclaraciones de envío o detalles de peso especial..."></textarea>
+      </div>
+
+      <!-- METODO DE PAGO -->
+      <div class="form-section">
+        <label class="form-label">Método de Pago</label>
+        <div class="payment-toggle">
+          <button type="button" class="dtoggle-btn active" id="payCashBtn" onclick="setPaymentMethod('efectivo')">💵
+            Efectivo</button>
+          <button type="button" class="dtoggle-btn" id="payTransBtn" onclick="setPaymentMethod('transferencia')">📱
+            Transferencia</button>
+        </div>
+      </div>
+
+      <!-- EFECTIVO SUBSECTION -->
+      <div class="form-section" id="cashSection" style="display: block;">
+        <label class="form-label">¿Con cuánto vas a pagar? (Opcional)</label>
+        <input class="form-input" type="number" id="fVuelto" placeholder="Ej: 20000" oninput="calculateChange()">
+        <div id="changeResult"
+          style="margin-top: 10px; font-size: 15px; font-weight: 700; color: #128C7E; display: none; background: rgba(37, 211, 102, 0.08); padding: 10px 14px; border-radius: 10px; border: 1.5px solid rgba(37, 211, 102, 0.2);">
+          💵 Su vuelto será de: <span id="changeAmount">$0</span>
+        </div>
+      </div>
+
+      <!-- TRANSFERENCIA SUBSECTION -->
+      <div class="form-section" id="transferSection" style="display: none;">
+        <div class="transfer-box">
+          <p class="transfer-box-title">Datos de Transferencia:</p>
+          <div class="transfer-data-list">
+            <div class="transfer-data-item"><strong>Titular:</strong> Victor Alejandro Jaureguina</div>
+            <div class="transfer-data-item"><strong>Banco:</strong> Ualá Bank S.A.U.</div>
+            <div class="transfer-copy-row">
+              <span><strong>Alias:</strong> <span id="aliasText" class="mono-text">punto25ale</span></span>
+              <button type="button" class="copy-btn" onclick="copyToClipboard('aliasText', 'Alias copiado!')">Copiar
+                📋</button>
+            </div>
+            <div class="transfer-copy-row">
+              <span><strong>CBU:</strong> <span id="cbuText" class="mono-text">3840200500000027216873</span></span>
+              <button type="button" class="copy-btn" onclick="copyToClipboard('cbuText', 'CBU copiado!')">Copiar
+                📋</button>
+            </div>
+          </div>
+          <p class="transfer-box-footer">
+            💡 Podés agendar nuestro número y compartir el comprobante por WhatsApp una vez finalizado el pedido.
+          </p>
+        </div>
+      </div>
+      <button class="wa-btn" onclick="sendWhatsApp()">
+        <span class="wa-icon">📲</span>
+        Enviar Pedido por WhatsApp
+      </button>
+    </div>
   </div>
-</div>
 
-<!-- DIGITAL RECEIPT MODAL (Recibo Físico Simulador) -->
-<div class="receipt-overlay" id="receiptOverlay" onclick="closeReceiptModal()"></div>
-<canvas id="celebrationCanvas" style="position: fixed; inset: 0; pointer-events: none; z-index: 2050; display: none; width: 100vw; height: 100vh;"></canvas>
-<div class="receipt-modal" id="receiptModal">
-  <div class="receipt-paper" id="receiptPaper">
-    <div class="receipt-header">
-      <div class="receipt-logo">PUNTO 25</div>
-      <div class="receipt-subtitle">Granja, Rebozados y Congelados</div>
-      <div class="receipt-address">Corrientes 664, Barrio Norte</div>
+  <!-- PRODUCT DETAIL MODAL -->
+  <div class="product-modal-overlay" id="productModalOverlay" onclick="closeProductModal()"></div>
+  <div class="product-modal" id="productModal">
+    <button class="pm-close-btn" onclick="closeProductModal()">✕</button>
+    <div class="pm-image-wrap" id="pmImageWrap"></div>
+    <div class="pm-content-wrap">
+      <div class="pm-header">
+        <span class="pm-category" id="pmCategory">CATEGORÍA</span>
+        <h2 class="pm-title" id="pmTitle">Nombre del Producto</h2>
+      </div>
+      <div class="pm-rating-row">
+        <span class="pm-stars">★★★★★</span>
+        <span class="pm-rating-value" id="pmRating">5.0</span>
+      </div>
+      <p class="pm-desc" id="pmDesc">Descripción detallada del producto...</p>
+
+      <div class="pm-info-section" id="pmIngredientsSection">
+        <span class="pm-section-title">🌿 Ingredientes Selección</span>
+        <p class="pm-ingredients" id="pmIngredients">Ingredientes...</p>
+      </div>
+
+      <div class="pm-info-section" id="pmPrepSection">
+        <span class="pm-section-title">⏱️ Preparación & Conservación</span>
+        <p class="pm-prep" id="pmPrep">Preparación...</p>
+      </div>
+
+      <div class="pm-price-row">
+        <span class="pm-price-label">Precio Unitario</span>
+        <span class="pm-price-value" id="pmPrice">$--</span>
+      </div>
+
+      <div class="pm-actions" id="pmActions">
+        <!-- Botones de compra rápida inyectados por JS -->
+      </div>
+
+      <button class="pm-back-btn" onclick="closeProductModal()">Volver al Catálogo 🐔</button>
+    </div>
+  </div>
+
+  <!-- DIGITAL RECEIPT MODAL (Recibo Físico Simulador) -->
+  <div class="receipt-overlay" id="receiptOverlay" onclick="closeReceiptModal()"></div>
+  <canvas id="celebrationCanvas"
+    style="position: fixed; inset: 0; pointer-events: none; z-index: 2050; display: none; width: 100vw; height: 100vh;"></canvas>
+  <div class="receipt-modal" id="receiptModal">
+    <div class="receipt-paper" id="receiptPaper">
+      <div class="receipt-header">
+        <div class="receipt-logo">PUNTO 25</div>
+        <div class="receipt-subtitle">Granja, Rebozados y Congelados</div>
+        <div class="receipt-address">Corrientes 664, Barrio Norte</div>
+        <div class="receipt-divider"></div>
+      </div>
+      <div class="receipt-meta">
+        <div class="receipt-meta-row"><span>ID PEDIDO:</span><span id="recId">#25-XXXX</span></div>
+        <div class="receipt-meta-row"><span>FECHA:</span><span id="recDate">--/--/----</span></div>
+        <div class="receipt-meta-row"><span>CLIENTE:</span><span id="recName">--</span></div>
+        <div class="receipt-meta-row"><span>TELÉFONO:</span><span id="recTel">--</span></div>
+        <div class="receipt-meta-row"><span>MODALIDAD:</span><span id="recDelivery">--</span></div>
+        <div class="receipt-meta-row"><span>METODO PAGO:</span><span id="recPayment">--</span></div>
+        <div class="receipt-divider"></div>
+      </div>
+      <div class="receipt-items-container" id="recItems">
+        <!-- Inyectado por JS -->
+      </div>
       <div class="receipt-divider"></div>
-    </div>
-    <div class="receipt-meta">
-      <div class="receipt-meta-row"><span>ID PEDIDO:</span><span id="recId">#25-XXXX</span></div>
-      <div class="receipt-meta-row"><span>FECHA:</span><span id="recDate">--/--/----</span></div>
-      <div class="receipt-meta-row"><span>CLIENTE:</span><span id="recName">--</span></div>
-      <div class="receipt-meta-row"><span>TELÉFONO:</span><span id="recTel">--</span></div>
-      <div class="receipt-meta-row"><span>MODALIDAD:</span><span id="recDelivery">--</span></div>
-      <div class="receipt-meta-row"><span>METODO PAGO:</span><span id="recPayment">--</span></div>
+      <div class="receipt-totals">
+        <div class="receipt-total-row"><span>Subtotal Productos:</span><span id="recSubtotal">$0</span></div>
+        <div class="receipt-total-row"><span>Costo Envío:</span><span id="recShipping">$0</span></div>
+        <div class="receipt-total-row main"><span>TOTAL DE COMPRA:</span><span id="recTotal">$0</span></div>
+      </div>
       <div class="receipt-divider"></div>
+      <div class="receipt-barcode">
+        <div class="barcode-lines">|||||| ||||| ||| ||||||| | ||||| | ||</div>
+        <div class="barcode-text">*** GRACIAS POR SU COMPRA ***</div>
+      </div>
     </div>
-    <div class="receipt-items-container" id="recItems">
-      <!-- Inyectado por JS -->
-    </div>
-    <div class="receipt-divider"></div>
-    <div class="receipt-totals">
-      <div class="receipt-total-row"><span>Subtotal Productos:</span><span id="recSubtotal">$0</span></div>
-      <div class="receipt-total-row"><span>Costo Envío:</span><span id="recShipping">$0</span></div>
-      <div class="receipt-total-row main"><span>TOTAL DE COMPRA:</span><span id="recTotal">$0</span></div>
-    </div>
-    <div class="receipt-divider"></div>
-    <div class="receipt-barcode">
-      <div class="barcode-lines">|||||| ||||| ||| ||||||| | ||||| | ||</div>
-      <div class="barcode-text">*** GRACIAS POR SU COMPRA ***</div>
+    <div class="receipt-actions">
+      <button class="receipt-btn download" onclick="downloadReceipt()">📥 Descargar Recibo</button>
+      <button class="receipt-btn close" onclick="closeReceiptModal()">Volver al Catálogo 🐔</button>
     </div>
   </div>
-  <div class="receipt-actions">
-    <button class="receipt-btn download" onclick="downloadReceipt()">📥 Descargar Recibo</button>
-    <button class="receipt-btn close" onclick="closeReceiptModal()">Volver al Catálogo 🐔</button>
-  </div>
-</div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
 
-<!-- SCRIPTS: data.js first, then app.js -->
-<script src="data.js"></script>
-<script src="app.js"></script>
+  <!-- SCRIPTS: data.js first, then app.js -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
 
 </body>
+
 </html>
