@@ -794,7 +794,7 @@ const MENU = [
     prepTime: 'fresco',
     price: 7000,
     unitType: 'unidad',
-    img: 'img/productos/Bandeja de Huevos gigantes #0 x20unid..jfif',
+    img: 'img/productos/Bandeja de Huevos gigantes 0 x20unid.jfif',
     emoji: '🥚',
     tags: ['granja', 'ahorro'],
     hot: false,
