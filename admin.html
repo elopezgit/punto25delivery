@@ -1718,6 +1718,95 @@
         </div>
       </div>
 
+      <!-- SECCIÓN DE ANALÍTICA AVANZADA DE NEGOCIO -->
+      <div class="section-label" style="margin-top: 40px;">💼 Análisis Avanzado de Clientes & Ventas</div>
+      
+      <!-- KPIs de Lealtad y Comportamiento -->
+      <div class="kpi-grid" style="margin-bottom: 24px;">
+        <div class="kpi-card" style="padding: 18px 20px;">
+          <div>
+            <div class="kpi-title" style="font-size: 12px;">Clientes Únicos</div>
+            <div class="kpi-value" id="kpi-unique-clients" style="font-size: 24px; color: var(--brand2);">0</div>
+            <div class="kpi-trend neutral" id="kpi-unique-trend" style="font-size: 11px;">Base de datos de compradores</div>
+          </div>
+          <div class="kpi-icon-wrap" style="width: 44px; height: 44px; font-size: 20px; background: rgba(59, 130, 246, 0.1); color: var(--blue);">👥</div>
+        </div>
+        
+        <div class="kpi-card" style="padding: 18px 20px;">
+          <div>
+            <div class="kpi-title" style="font-size: 12px;">Clientes Recurrentes</div>
+            <div class="kpi-value" id="kpi-repeat-clients" style="font-size: 24px; color: #16a34a;">0</div>
+            <div class="kpi-trend neutral" id="kpi-repeat-trend" style="font-size: 11px;">Compraron más de una vez</div>
+          </div>
+          <div class="kpi-icon-wrap" style="width: 44px; height: 44px; font-size: 20px; background: rgba(37, 211, 102, 0.1); color: var(--green);">🔄</div>
+        </div>
+
+        <div class="kpi-card" style="padding: 18px 20px;">
+          <div>
+            <div class="kpi-title" style="font-size: 12px;">Tasa de Recurrencia</div>
+            <div class="kpi-value" id="kpi-recurrence-rate" style="font-size: 24px; color: var(--gold-dark);">0%</div>
+            <div class="kpi-trend neutral" id="kpi-recurrence-trend" style="font-size: 11px;">Fidelidad general</div>
+          </div>
+          <div class="kpi-icon-wrap" style="width: 44px; height: 44px; font-size: 20px; background: rgba(255, 184, 28, 0.1); color: var(--gold-dark);">⭐</div>
+        </div>
+
+        <div class="kpi-card" style="padding: 18px 20px;">
+          <div>
+            <div class="kpi-title" style="font-size: 12px;">Promedio de Ítems</div>
+            <div class="kpi-value" id="kpi-avg-items" style="font-size: 24px; color: var(--red);">0</div>
+            <div class="kpi-trend neutral" id="kpi-items-trend" style="font-size: 11px;">Unidades por pedido</div>
+          </div>
+          <div class="kpi-icon-wrap" style="width: 44px; height: 44px; font-size: 20px; background: rgba(239, 68, 68, 0.1); color: var(--red);">🛍️</div>
+        </div>
+      </div>
+
+      <!-- Tablas Analíticas de Negocio -->
+      <div class="reports-grid" style="margin-bottom: 30px;">
+        <!-- Ranking Clientes -->
+        <div class="preview-card" style="min-height: 400px;">
+          <div class="preview-header">
+            <h3 class="preview-title" style="font-size: 16.5px;">👑 Ranking de Clientes Fieles (LTV)</h3>
+          </div>
+          <div style="flex:1; width:100%; overflow-x:auto;">
+            <table class="orders-table" style="font-size: 13.5px; width: 100%;">
+              <thead>
+                <tr>
+                  <th style="padding: 10px 14px; font-size: 11.5px;">Cliente</th>
+                  <th style="padding: 10px 14px; font-size: 11.5px;">Contacto</th>
+                  <th style="padding: 10px 14px; font-size: 11.5px; text-align: center;">Pedidos</th>
+                  <th style="padding: 10px 14px; font-size: 11.5px; text-align: right;">Total Gastado</th>
+                </tr>
+              </thead>
+              <tbody id="topClientsTableBody">
+                <!-- Inyectado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Rendimiento de Ventas por Producto -->
+        <div class="preview-card" style="min-height: 400px;">
+          <div class="preview-header">
+            <h3 class="preview-title" style="font-size: 16.5px;">📊 Rendimiento por Producto</h3>
+          </div>
+          <div style="flex:1; width:100%; overflow-x:auto;">
+            <table class="orders-table" style="font-size: 13.5px; width: 100%;">
+              <thead>
+                <tr>
+                  <th style="padding: 10px 14px; font-size: 11.5px;">Producto</th>
+                  <th style="padding: 10px 14px; font-size: 11.5px; text-align: center;">Unid. Vendidas</th>
+                  <th style="padding: 10px 14px; font-size: 11.5px; text-align: right;">Ingresos ($)</th>
+                  <th style="padding: 10px 14px; font-size: 11.5px; text-align: center;">% Ventas</th>
+                </tr>
+              </thead>
+              <tbody id="productPerformanceTableBody">
+                <!-- Inyectado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </section>
 
     <!-- VIEW: CATALOG -->

@@ -375,6 +375,46 @@ function generateMockSales() {
 }
 
 // ─── REPORTES Y VISTA GENERAL (KPI & GRAFICOS) ───────────────────────
+
+// Analiza las líneas de detalle de un pedido y retorna un arreglo estructurado de ítems con cantidades e ingresos calculados
+function parseOrderItems(detalleString) {
+  const items = [];
+  if (!detalleString) return items;
+  
+  const lines = detalleString.split('\n');
+  const sortedMenu = [...MENU].sort((a, b) => b.name.length - a.name.length);
+  
+  lines.forEach(line => {
+    const cleanLine = line.trim();
+    if (!cleanLine) return;
+    
+    // Obtener cantidad
+    const qtyMatch = cleanLine.match(/^(\d+)\s*x/i);
+    const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+    
+    // Buscar coincidencia del producto
+    const match = sortedMenu.find(p => cleanLine.toLowerCase().includes(p.name.toLowerCase()));
+    if (match) {
+      // Calcular precio unitario según la opción
+      let price = match.price;
+      if (cleanLine.includes("500g") && match.priceHalf) {
+        price = match.priceHalf;
+      } else if (cleanLine.includes("Unidad") && match.priceUnit) {
+        price = match.priceUnit;
+      }
+      
+      items.push({
+        product: match,
+        qty: qty,
+        unitPrice: price,
+        subtotal: price * qty
+      });
+    }
+  });
+  
+  return items;
+}
+
 function updateDashboardMetrics() {
   const validOrders = allOrders.filter(o => o.estado !== "Cancelado");
   const totalOrders = validOrders.length;
@@ -403,8 +443,9 @@ function updateDashboardMetrics() {
   // Renderizar gráficos del dashboard
   renderOverviewCharts();
   
-  // Renderizar estrella y vistas recientes
+  // Renderizar estrella, analíticas avanzadas y vistas recientes
   renderStarProducts();
+  updateAdvancedAnalytics();
   renderRecentOrdersPreview();
 }
 
@@ -487,28 +528,16 @@ function renderOverviewCharts() {
   };
 
   validOrders.forEach(o => {
-    // Parsear el detalle del pedido para identificar a qué categoría pertenecen sus ítems
-    const lines = o.detalle.split("\n");
-    lines.forEach(line => {
-      // Buscar coincidencia de nombre de producto en el menú original
-      const match = MENU.find(p => line.includes(p.name));
-      if (match) {
-        // Encontrar valor de la línea ($ de subtotal)
-        const parts = line.split('—');
-        if (parts.length > 1) {
-          const val = parseFloat(parts[1].replace('$', '').replace(/\./g, '').replace(',', '').trim());
-          if (!isNaN(val)) {
-            let catLabel = 'Almacén 🥚';
-            if (match.cat === 'pollo-rebozado') catLabel = 'Rebozados Pollo 🍗';
-            else if (match.cat === 'pollo-granja') catLabel = 'Granja & Cortes 🐔';
-            else if (match.cat === 'pescados-mariscos') catLabel = 'Mar y Río 🐟';
-            else if (match.cat === 'veggie-soja') catLabel = 'Veggie & Soja 🌿';
-            else if (match.cat === 'bocados-papas') catLabel = 'Bocados & Papas 🍟';
-            
-            catSales[catLabel] += val;
-          }
-        }
-      }
+    const items = parseOrderItems(o.detalle);
+    items.forEach(item => {
+      let catLabel = 'Almacén 🥚';
+      if (item.product.cat === 'pollo-rebozado') catLabel = 'Rebozados Pollo 🍗';
+      else if (item.product.cat === 'pollo-granja') catLabel = 'Granja & Cortes 🐔';
+      else if (item.product.cat === 'pescados-mariscos') catLabel = 'Mar y Río 🐟';
+      else if (item.product.cat === 'veggie-soja') catLabel = 'Veggie & Soja 🌿';
+      else if (item.product.cat === 'bocados-papas') catLabel = 'Bocados & Papas 🍟';
+      
+      catSales[catLabel] += item.subtotal;
     });
   });
 
@@ -668,27 +697,13 @@ function renderStarProducts() {
   const countMap = {};
 
   validOrders.forEach(o => {
-    const lines = o.detalle.split("\n");
-    lines.forEach(line => {
-      // Formato: 2x 🍗 Patitas — $X
-      const match = MENU.find(p => line.includes(p.name));
-      if (match) {
-        // Encontrar cantidad
-        const qtyMatch = line.match(/^(\d+)x/);
-        const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
-        
-        if (!countMap[match.id]) {
-          countMap[match.id] = { product: match, count: 0, revenue: 0 };
-        }
-        countMap[match.id].count += qty;
-        
-        // Sumar subtotal
-        const parts = line.split('—');
-        if (parts.length > 1) {
-          const val = parseFloat(parts[1].replace('$', '').replace(/\./g, '').replace(',', '').trim());
-          if (!isNaN(val)) countMap[match.id].revenue += val;
-        }
+    const items = parseOrderItems(o.detalle);
+    items.forEach(item => {
+      if (!countMap[item.product.id]) {
+        countMap[item.product.id] = { product: item.product, count: 0, revenue: 0 };
       }
+      countMap[item.product.id].count += item.qty;
+      countMap[item.product.id].revenue += item.subtotal;
     });
   });
 
@@ -728,6 +743,125 @@ function renderStarProducts() {
         </div>
       </div>`;
   });
+}
+
+function updateAdvancedAnalytics() {
+  const validOrders = allOrders.filter(o => o.estado !== "Cancelado");
+  
+  // ─── 1. ANÁLISIS DE CLIENTES ───
+  const customersMap = {};
+  
+  validOrders.forEach(o => {
+    const phone = o.tel.toString().trim();
+    if (!phone || phone === "--") return;
+    
+    if (!customersMap[phone]) {
+      customersMap[phone] = {
+        name: o.nombre,
+        phone: phone,
+        orderCount: 0,
+        totalSpent: 0,
+        lastOrderDate: o.timestamp
+      };
+    }
+    
+    customersMap[phone].orderCount += 1;
+    customersMap[phone].totalSpent += o.total;
+    if (new Date(o.timestamp) > new Date(customersMap[phone].lastOrderDate)) {
+      customersMap[phone].lastOrderDate = o.timestamp;
+      customersMap[phone].name = o.nombre;
+    }
+  });
+
+  const customerList = Object.values(customersMap);
+  const uniqueClientsCount = customerList.length;
+  const repeatClientsCount = customerList.filter(c => c.orderCount > 1).length;
+  const recurrenceRate = uniqueClientsCount > 0 ? Math.round((repeatClientsCount / uniqueClientsCount) * 100) : 0;
+
+  // Actualizar KPIs en el DOM
+  document.getElementById("kpi-unique-clients").textContent = uniqueClientsCount;
+  document.getElementById("kpi-repeat-clients").textContent = repeatClientsCount;
+  document.getElementById("kpi-recurrence-rate").textContent = `${recurrenceRate}%`;
+  
+  const repeatTrendEl = document.getElementById("kpi-repeat-trend");
+  const recurrenceTrendEl = document.getElementById("kpi-recurrence-trend");
+  if (repeatTrendEl) repeatTrendEl.textContent = `${repeatClientsCount} de ${uniqueClientsCount} clientes volvieron`;
+  if (recurrenceTrendEl) recurrenceTrendEl.textContent = uniqueClientsCount > 0 ? `Excelente tasa de fidelización` : "Sin datos de clientes";
+
+  // Renderizar Ranking de Clientes Fieles (LTV)
+  const topClients = [...customerList].sort((a, b) => b.totalSpent - a.totalSpent).slice(0, 5);
+  const topClientsBody = document.getElementById("topClientsTableBody");
+  
+  if (topClientsBody) {
+    topClientsBody.innerHTML = "";
+    if (topClients.length === 0) {
+      topClientsBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:var(--text-light)">Aún no hay clientes registrados.</td></tr>`;
+    } else {
+      topClients.forEach(c => {
+        topClientsBody.innerHTML += `
+          <tr>
+            <td style="font-weight: 700; padding: 12px 14px;">👤 ${c.name}</td>
+            <td style="color: var(--text-light); padding: 12px 14px; font-family: monospace;">${c.phone}</td>
+            <td style="text-align: center; font-weight: 700; padding: 12px 14px;">${c.orderCount}</td>
+            <td style="text-align: right; font-weight: 800; color: var(--brand); padding: 12px 14px;">$${c.totalSpent.toLocaleString('es-AR')}</td>
+          </tr>`;
+      });
+    }
+  }
+
+  // ─── 2. ANÁLISIS DE PRODUCTOS COMPLETO ───
+  const productsMap = {};
+  let totalItemsSold = 0;
+
+  validOrders.forEach(o => {
+    const items = parseOrderItems(o.detalle);
+    items.forEach(item => {
+      const pid = item.product.id;
+      if (!productsMap[pid]) {
+        productsMap[pid] = {
+          product: item.product,
+          unitsSold: 0,
+          revenue: 0
+        };
+      }
+      productsMap[pid].unitsSold += item.qty;
+      productsMap[pid].revenue += item.subtotal;
+      totalItemsSold += item.qty;
+    });
+  });
+
+  // KPI Promedio de ítems por pedido
+  const avgItemsPerOrder = validOrders.length > 0 ? (totalItemsSold / validOrders.length).toFixed(1) : 0;
+  document.getElementById("kpi-avg-items").textContent = avgItemsPerOrder;
+  
+  const itemsTrendEl = document.getElementById("kpi-items-trend");
+  if (itemsTrendEl) itemsTrendEl.textContent = `Total de ${totalItemsSold} unidades vendidas en cocina`;
+
+  // Renderizar tabla de rendimiento por producto
+  const productPerformanceList = Object.values(productsMap).sort((a, b) => b.unitsSold - a.unitsSold).slice(0, 8);
+  const prodPerfBody = document.getElementById("productPerformanceTableBody");
+
+  if (prodPerfBody) {
+    prodPerfBody.innerHTML = "";
+    if (productPerformanceList.length === 0) {
+      prodPerfBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:var(--text-light)">Aún no hay productos vendidos.</td></tr>`;
+    } else {
+      productPerformanceList.forEach(p => {
+        const pctShare = totalItemsSold > 0 ? ((p.unitsSold / totalItemsSold) * 100).toFixed(1) : 0;
+        prodPerfBody.innerHTML += `
+          <tr>
+            <td style="font-weight: 700; padding: 12px 14px;">
+              <span style="font-size: 16px; margin-right: 4px;">${p.product.emoji}</span> ${p.product.name}
+            </td>
+            <td style="text-align: center; font-weight: 700; padding: 12px 14px;">${p.unitsSold} u.</td>
+            <td style="text-align: right; font-weight: 800; color: #16a34a; padding: 12px 14px;">$${p.revenue.toLocaleString('es-AR')}</td>
+            <td style="text-align: center; padding: 12px 14px;">
+              <span style="font-size: 12px; background: var(--bg); padding: 3px 6px; border-radius: 6px; font-weight: 700; color: var(--text-light);">${pctShare}%</span>
+            </td>
+          </tr>`;
+      });
+    }
+  }
 }
 
 function renderRecentOrdersPreview() {
