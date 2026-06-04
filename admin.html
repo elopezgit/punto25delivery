@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 Panel de Control - Punto 25 Delivery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN for beautiful visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --brand: #00A4E4;         /* Celeste brillante */
+      --brand2: #003a70;        /* Azul marino profundo */
+      --brand-dark: #002244;    /* Azul oscuro */
+      --bg: #f0f6fc;            /* Fondo sutil */
+      --surface: #ffffff;       /* Tarjetas y paneles */
+      --surface-glass: rgba(255, 255, 255, 0.85);
+      --text: #0f172a;          /* Texto principal */
+      --text-light: #475569;    /* Texto secundario */
+      --border: #cbd5e1;        /* Bordes */
+      --gold: #FFB81C;          /* Amarillo Oro */
+      --gold-dark: #d97706;     /* Dorado oscuro */
+      --green: #25D366;         /* Verde WhatsApp */
+      --red: #ef4444;           /* Rojo error/cancelado */
+      --orange: #f97316;        /* Naranja pendiente */
+      --blue: #3b82f6;          /* Azul preparación */
+      --shadow-sm: 0 4px 6px -1px rgba(0, 58, 112, 0.05), 0 2px 4px -2px rgba(0, 58, 112, 0.05);
+      --shadow-md: 0 10px 15px -3px rgba(0, 58, 112, 0.08), 0 4px 6px -4px rgba(0, 58, 112, 0.08);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 58, 112, 0.12), 0 8px 10px -6px rgba(0, 58, 112, 0.12);
+      --sidebar-width: 260px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.dark {
+      --bg: #0b1329;            /* Fondo oscuro */
+      --surface: #1c2541;       /* Paneles oscuros */
+      --surface-glass: rgba(28, 37, 65, 0.85);
+      --text: #f8fafc;          /* Texto claro */
+      --text-light: #94a3b8;    /* Texto secundario claro */
+      --border: #334155;        /* Bordes oscuros */
+      --brand-dark: #001122;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+      transition: background-color 0.3s;
+    }
+
+    /* ─── LOGIN OVERLAY ─── */
+    #loginOverlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, var(--brand2) 0%, var(--brand-dark) 100%);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    #loginOverlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.05);
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      width: 100%;
+      max-width: 400px;
+      padding: 40px 30px;
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      color: white;
+      animation: loginFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes loginFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .login-logo {
+      width: 120px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--brand2) 20%, var(--brand-dark) 100%);
+      border: 3.5px solid var(--gold);
+      margin: 0 auto 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    .login-logo-t1 { font-weight: 800; font-size: 16px; color: var(--gold); line-height: 1; }
+    .login-logo-t2 { 
+      font-weight: 900; font-size: 28px; color: var(--brand); 
+      text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+      line-height: 0.95; margin: -1px 0;
+    }
+    .login-logo-t3 { font-style: italic; font-weight: 700; font-size: 9px; text-transform: uppercase; line-height: 1; }
+
+    .login-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .login-subtitle {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 30px;
+    }
+
+    .login-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .login-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 6px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      outline: none;
+      font-size: 16px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .login-input:focus {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--brand);
+      box-shadow: 0 0 15px rgba(0, 164, 228, 0.4);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
+      color: white;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 164, 228, 0.3);
+      transition: var(--transition);
+      margin-top: 10px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 164, 228, 0.45);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .login-error {
+      color: #ffa5a5;
+      font-size: 14.5px;
+      font-weight: 600;
+      margin-top: 15px;
+      display: none;
+    }
+
+    /* ─── SIDEBAR NAVIGATION ─── */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--brand2);
+      color: white;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 500;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-logo {
+      width: 54px;
+      height: 38px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--brand2) 20%, var(--brand-dark) 100%);
+      border: 1.5px solid var(--gold);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar-logo-t1 { font-weight: 800; font-size: 8px; color: var(--gold); line-height: 1; }
+    .sidebar-logo-t2 { 
+      font-weight: 900; font-size: 14px; color: var(--brand); 
+      text-shadow: -0.5px -0.5px 0 #fff, 0.5px -0.5px 0 #fff, -0.5px 0.5px 0 #fff, 0.5px 0.5px 0 #fff;
+      line-height: 0.95; margin: -1px 0;
+    }
+
+    .sidebar-title {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .sidebar-title span {
+      color: var(--brand);
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu-item-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15.5px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .menu-item-link:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+    }
+
+    .menu-item-link.active {
+      background: linear-gradient(135deg, var(--brand) 0%, rgba(0, 164, 228, 0.6) 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 164, 228, 0.25);
+    }
+
+    .menu-item-icon {
+      font-size: 18px;
+    }
+
+    .sidebar-footer {
+      padding: 20px 24px;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .theme-toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px 14px;
+      border-radius: 12px;
+    }
+
+    .theme-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .theme-toggle-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: var(--transition);
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      font-weight: 700;
+      font-size: 14.5px;
+      cursor: pointer;
+      background: transparent;
+      transition: var(--transition);
+    }
+
+    .logout-btn:hover {
+      background: var(--red);
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    /* ─── MAIN CONTENT AREA ─── */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 30px 40px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      max-width: 1600px;
+      width: calc(100% - var(--sidebar-width));
+      transition: var(--transition);
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+      border-bottom: 1.5px solid var(--border);
+    }
+
+    .top-greeting h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--brand2);
+    }
+    body.dark .top-greeting h1 {
+      color: var(--brand);
+    }
+    .top-greeting p {
+      font-size: 14.5px;
+      color: var(--text-light);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .connection-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13.5px;
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+    }
+    .connection-badge.connected {
+      background: rgba(37, 211, 102, 0.1);
+      color: #16a34a;
+      border: 1px solid rgba(37, 211, 102, 0.2);
+    }
+    .connection-badge.offline {
+      background: rgba(255, 184, 28, 0.12);
+      color: var(--gold-dark);
+      border: 1px solid rgba(255, 184, 28, 0.2);
+    }
+    .connection-badge .dot-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .connection-badge.connected .dot-pulse {
+      background: var(--green);
+      animation: livePulse 1.8s infinite;
+    }
+    .connection-badge.offline .dot-pulse {
+      background: var(--gold);
+    }
+
+    @keyframes livePulse {
+      0% { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(37, 211, 102, 0); }
+      100% { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+    }
+
+    .sync-btn {
+      padding: 10px 18px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .sync-btn:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+      transform: translateY(-1px);
+    }
+    .sync-btn:active {
+      transform: translateY(0);
+    }
+    .sync-btn.loading span {
+      animation: spin 1s infinite linear;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ─── OVERVIEW VIEWS CONTROLLER ─── */
+    .view-section {
+      display: none;
+      animation: viewFade 0.4s ease forwards;
+    }
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes viewFade {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── KPI CARDS ─── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: rgba(0, 164, 228, 0.3);
+    }
+
+    .kpi-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 6px;
+    }
+
+    .kpi-trend {
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .kpi-trend.up { color: #16a34a; }
+    .kpi-trend.down { color: var(--red); }
+    .kpi-trend.neutral { color: var(--text-light); }
+
+    .kpi-icon-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+    .kpi-1 .kpi-icon-wrap { background: rgba(0, 164, 228, 0.08); color: var(--brand); }
+    .kpi-2 .kpi-icon-wrap { background: rgba(0, 58, 112, 0.08); color: var(--brand2); }
+    body.dark .kpi-2 .kpi-icon-wrap { background: rgba(0, 164, 228, 0.15); color: #93c5fd; }
+    .kpi-3 .kpi-icon-wrap { background: rgba(255, 184, 28, 0.1); color: var(--gold-dark); }
+    .kpi-4 .kpi-icon-wrap { background: rgba(37, 211, 102, 0.1); color: var(--green); }
+
+    /* ─── CHARTS GRID ─── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 1024px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--brand2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    body.dark .chart-title {
+      color: var(--brand);
+    }
+
+    .chart-canvas-wrap {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 280px;
+    }
+
+    /* ─── DASHBOARD BOTTOM (Top selling + Recent orders preview) ─── */
+    .dashboard-bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-bottom-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .preview-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      border-bottom: 1.5px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .preview-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--brand2);
+    }
+    body.dark .preview-title {
+      color: var(--brand);
+    }
+
+    .preview-btn {
+      color: var(--brand);
+      font-weight: 700;
+      font-size: 14.5px;
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+    .preview-btn:hover {
+      text-decoration: underline;
+    }
+
+    /* Products List */
+    .top-products-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .top-product-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      border-radius: 12px;
+      background: var(--bg);
+      transition: var(--transition);
+    }
+    .top-product-item:hover {
+      transform: translateX(4px);
+    }
+
+    .prod-details {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .prod-emoji {
+      font-size: 24px;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .prod-name {
+      font-weight: 700;
+      font-size: 15.5px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .prod-category {
+      font-size: 12.5px;
+      color: var(--text-light);
+      margin-top: 1px;
+    }
+
+    .prod-stats {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .prod-sales {
+      font-weight: 800;
+      font-size: 15.5px;
+      color: var(--brand2);
+    }
+    body.dark .prod-sales {
+      color: var(--brand);
+    }
+    .prod-revenue {
+      font-size: 12.5px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    /* ─── ORDERS LIST VIEW ─── */
+    .orders-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+
+    .orders-search-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: var(--text-light);
+      pointer-events: none;
+    }
+
+    .search-field {
+      width: 100%;
+      padding: 12px 16px 12px 46px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 600;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-field:focus {
+      border-color: var(--brand);
+      background: var(--surface);
+      box-shadow: 0 4px 12px rgba(0, 164, 228, 0.08);
+    }
+
+    .select-field {
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15.5px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+      min-width: 180px;
+      transition: var(--transition);
+    }
+
+    .select-field:focus {
+      border-color: var(--brand);
+      background: var(--surface);
+    }
+
+    /* Tabs filters for status */
+    .status-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+    }
+    .status-tabs::-webkit-scrollbar { display: none; }
+
+    .status-tab {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13.5px;
+      font-weight: 800;
+      cursor: pointer;
+      background: var(--bg);
+      color: var(--text-light);
+      border: 1.5px solid var(--border);
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .status-tab:hover {
+      color: var(--text);
+      border-color: var(--brand);
+    }
+
+    .status-tab.active {
+      color: white;
+      border-color: transparent;
+    }
+    .status-tab[data-status="todos"].active { background: var(--brand2); }
+    body.dark .status-tab[data-status="todos"].active { background: var(--brand); }
+    .status-tab[data-status="Pendiente"].active { background: var(--orange); }
+    .status-tab[data-status="En Preparación"].active { background: var(--blue); }
+    .status-tab[data-status="Enviado"].active { background: var(--brand); }
+    .status-tab[data-status="Entregado"].active { background: var(--green); }
+    .status-tab[data-status="Cancelado"].active { background: var(--red); }
+
+    /* Orders Table Card */
+    .table-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    .orders-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    .orders-table th {
+      background: var(--brand2);
+      color: white;
+      padding: 16px 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+    body.dark .orders-table th {
+      background: var(--brand-dark);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .orders-table td {
+      padding: 16px 20px;
+      border-bottom: 1.5px solid var(--border);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .orders-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .orders-table tr {
+      transition: background-color 0.2s;
+    }
+
+    .orders-table tr:hover {
+      background: rgba(0, 164, 228, 0.03);
+    }
+
+    .order-id-badge {
+      font-family: monospace;
+      font-weight: 800;
+      font-size: 14.5px;
+      color: var(--brand2);
+      background: rgba(0, 58, 112, 0.06);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    body.dark .order-id-badge {
+      color: var(--brand);
+      background: rgba(0, 164, 228, 0.12);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 800;
+      text-align: center;
+    }
+    .status-badge.pendiente { background: rgba(249, 115, 22, 0.12); color: var(--orange); border: 1px solid rgba(249, 115, 22, 0.2); }
+    .status-badge.preparacion { background: rgba(59, 130, 246, 0.12); color: var(--blue); border: 1px solid rgba(59, 130, 246, 0.2); }
+    .status-badge.enviado { background: rgba(0, 164, 228, 0.1); color: var(--brand); border: 1px solid rgba(0, 164, 228, 0.2); }
+    .status-badge.entregado { background: rgba(37, 211, 102, 0.12); color: #16a34a; border: 1px solid rgba(37, 211, 102, 0.2); }
+    .status-badge.cancelado { background: rgba(239, 104, 104, 0.12); color: var(--red); border: 1px solid rgba(239, 104, 104, 0.2); }
+
+    .action-cell-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .action-cell-btn:hover {
+      background: var(--brand);
+      border-color: transparent;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0, 164, 228, 0.2);
+    }
+
+    /* Paginator */
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-top: 1.5px solid var(--border);
+      background: var(--surface);
+    }
+
+    .pag-info {
+      font-size: 14px;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+
+    .pag-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pag-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .pag-btn:hover:not(:disabled) {
+      border-color: var(--brand);
+      color: var(--brand);
+    }
+    .pag-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ─── DETAILED REPORTS VIEW ─── */
+    .reports-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 1024px) {
+      .reports-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ─── CATALOG VIEW ─── */
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .catalog-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .catalog-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: rgba(0, 164, 228, 0.3);
+    }
+
+    .cat-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .cat-emoji-wrap {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: var(--bg);
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .cat-badge-pill {
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: rgba(0, 58, 112, 0.05);
+      color: var(--text-light);
+      text-transform: uppercase;
+    }
+
+    .cat-body {
+      flex: 1;
+      margin-bottom: 16px;
+    }
+
+    .cat-title-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--brand-dark);
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+    body.dark .cat-title-name {
+      color: white;
+    }
+
+    .cat-desc-text {
+      font-size: 13.5px;
+      color: var(--text-light);
+      line-height: 1.4;
+    }
+
+    .cat-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+
+    .cat-price-val {
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--brand);
+    }
+
+    .cat-rating {
+      font-size: 13.5px;
+      color: var(--gold-dark);
+      font-weight: 700;
+    }
+
+    /* ─── MODAL TICKET DETALLADO ─── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 20, 40, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      width: 100%;
+      max-width: 520px;
+      border-radius: 24px;
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      transform: translateY(20px) scale(0.95);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+    }
+
+    .modal-overlay.open .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title-text {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--brand2);
+    }
+    body.dark .modal-title-text {
+      color: var(--brand);
+    }
+
+    .modal-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: none;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .modal-close-btn:hover {
+      background: var(--border);
+    }
+
+    .modal-body-scroll {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* Ticket Térmico Simulador */
+    .receipt-paper {
+      background: #fbfbfb;
+      border: 1.5px solid #e2e8f0;
+      color: #1e293b;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.02);
+      font-family: 'Outfit', sans-serif;
+    }
+    body.dark .receipt-paper {
+      background: #fdfdfd; /* El ticket físico simulado se mantiene blanco para realismo */
+      color: #0f172a;
+    }
+
+    .receipt-header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .receipt-logo {
+      font-weight: 800;
+      font-size: 21px;
+      color: var(--brand2);
+      letter-spacing: 0.5px;
+    }
+
+    .receipt-subtitle {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .receipt-address {
+      font-size: 11.5px;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .receipt-divider {
+      border-top: 1.5px dashed #cbd5e1;
+      margin: 12px 0;
+    }
+
+    .receipt-meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    .receipt-meta-row span:first-child {
+      color: #64748b;
+    }
+    .receipt-meta-row span:last-child {
+      font-weight: 700;
+    }
+
+    .receipt-items-container {
+      margin: 16px 0;
+    }
+
+    .receipt-item-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .receipt-item-name {
+      flex: 1;
+      min-width: 0;
+      padding-right: 12px;
+    }
+
+    .receipt-totals {
+      margin-top: 12px;
+    }
+
+    .receipt-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .receipt-total-row.main {
+      font-size: 18px;
+      font-weight: 800;
+      border-top: 1.5px dashed #cbd5e1;
+      padding-top: 8px;
+      margin-top: 6px;
+    }
+
+    .receipt-barcode {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .barcode-lines {
+      font-size: 26px;
+      letter-spacing: 1px;
+      color: #334155;
+    }
+    .barcode-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* Modal status controller */
+    .status-controller-section {
+      margin-top: 20px;
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .status-control-label {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--text-light);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .status-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .modal-action-btn {
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: white;
+      transition: var(--transition);
+    }
+    .modal-action-btn.btn-prep { background: var(--blue); }
+    .modal-action-btn.btn-send { background: var(--brand); }
+    .modal-action-btn.btn-done { background: var(--green); }
+    .modal-action-btn.btn-cancel { background: var(--red); grid-column: span 2; }
+
+    .modal-action-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .modal-action-btn:active {
+      transform: translateY(0);
+    }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--brand-dark);
+      color: white;
+      border-radius: 30px;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 11000;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: var(--shadow-lg);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .toast-icon { font-size: 18px; }
+
+    /* ─── RESPONSIVENESS ─── */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+      }
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+      .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .top-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .orders-search-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN OVERLAY -->
+  <div id="loginOverlay">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="login-logo-t1">PUNTO</div>
+        <div class="login-logo-t2">25</div>
+        <div class="login-logo-t3">Delivery</div>
+      </div>
+      <h2 class="login-title">Acceso Administrativo</h2>
+      <p class="login-subtitle">Ingrese sus credenciales de seguridad</p>
+      
+      <div class="login-group">
+        <label class="login-label" for="usernameInput">Usuario</label>
+        <input class="login-input" type="text" id="usernameInput" placeholder="admin" autocomplete="username">
+      </div>
+      
+      <div class="login-group">
+        <label class="login-label" for="passwordInput">Contraseña</label>
+        <input class="login-input" type="password" id="passwordInput" placeholder="••••••" autocomplete="current-password">
+      </div>
+      
+      <button class="login-btn" onclick="validateLogin()">Iniciar Sesión 🔐</button>
+      
+      <div class="login-error" id="loginError">⚠️ Usuario o contraseña incorrectos.</div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-t1">PUNTO</div>
+        <div class="sidebar-logo-t2">25</div>
+      </div>
+      <div class="sidebar-title">Punto <span>25</span> Admin</div>
+    </div>
+    
+    <ul class="sidebar-menu">
+      <li>
+        <a class="menu-item-link active" onclick="switchView('overview')" id="nav-overview">
+          <span class="menu-item-icon">📊</span>
+          <span>Vista General</span>
+        </a>
+      </li>
+      <li>
+        <a class="menu-item-link" onclick="switchView('orders')" id="nav-orders">
+          <span class="menu-item-icon">📦</span>
+          <span>Pedidos</span>
+        </a>
+      </li>
+      <li>
+        <a class="menu-item-link" onclick="switchView('reports')" id="nav-reports">
+          <span class="menu-item-icon">📈</span>
+          <span>Reportes</span>
+        </a>
+      </li>
+      <li>
+        <a class="menu-item-link" onclick="switchView('catalog')" id="nav-catalog">
+          <span class="menu-item-icon">🏷️</span>
+          <span>Catálogo & Stock</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle-container">
+        <span class="theme-label">Modo Noche</span>
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">🌙</button>
+      </div>
+      
+      <button class="logout-btn" onclick="logout()">
+        <span>🚪</span>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="main-content">
+    
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="top-greeting">
+        <h1 id="pageTitle">Vista General</h1>
+        <p id="currentDateText">Cargando fecha...</p>
+      </div>
+      
+      <div class="top-actions">
+        <div class="connection-badge connected" id="connBadge">
+          <span class="dot-pulse"></span>
+          <span id="connBadgeText">Conectando...</span>
+        </div>
+        
+        <button class="sync-btn" onclick="fetchData()" id="syncBtn">
+          <span>🔄</span> Sincronizar
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW: OVERVIEW -->
+    <section class="view-section active" id="view-overview">
+      
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-1">
+          <div>
+            <div class="kpi-title">Total Facturado</div>
+            <div class="kpi-value" id="kpi-revenue">$0</div>
+            <div class="kpi-trend up" id="kpi-revenue-trend">▲ 12.5% vs mes anterior</div>
+          </div>
+          <div class="kpi-icon-wrap">💵</div>
+        </div>
+
+        <div class="kpi-card kpi-2">
+          <div>
+            <div class="kpi-title">Pedidos Totales</div>
+            <div class="kpi-value" id="kpi-orders">0</div>
+            <div class="kpi-trend up" id="kpi-orders-trend">▲ 8.3% este mes</div>
+          </div>
+          <div class="kpi-icon-wrap">📦</div>
+        </div>
+
+        <div class="kpi-card kpi-3">
+          <div>
+            <div class="kpi-title">Ticket Promedio</div>
+            <div class="kpi-value" id="kpi-aov">$0</div>
+            <div class="kpi-trend neutral" id="kpi-aov-trend">● Estable esta semana</div>
+          </div>
+          <div class="kpi-icon-wrap">🛍️</div>
+        </div>
+
+        <div class="kpi-card kpi-4">
+          <div>
+            <div class="kpi-title">Envío Delivery</div>
+            <div class="kpi-value" id="kpi-delivery">0%</div>
+            <div class="kpi-trend neutral" id="kpi-delivery-trend">Preferencia del cliente</div>
+          </div>
+          <div class="kpi-icon-wrap">🛵</div>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">📈 Evolución de Ventas (Últimos 30 días)</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="salesChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">🍕 Categorías Más Vendidas</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="categoriesChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Dashboard Grid -->
+      <div class="dashboard-bottom-grid">
+        <div class="preview-card">
+          <div class="preview-header">
+            <h3 class="preview-title">⭐ Productos Estrella</h3>
+          </div>
+          <div class="top-products-list" id="topProductsList">
+            <!-- Inyectado dinámicamente -->
+          </div>
+        </div>
+
+        <div class="preview-card">
+          <div class="preview-header">
+            <h3 class="preview-title">Recent Orders Preview</h3>
+            <button class="preview-btn" onclick="switchView('orders')">Ver todos ➔</button>
+          </div>
+          <div style="flex:1; width:100%; overflow-x:auto;">
+            <table class="orders-table" style="font-size: 14px;">
+              <thead>
+                <tr>
+                  <th>Pedido</th>
+                  <th>Cliente</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersPreviewBody">
+                <!-- Inyectado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW: ORDERS -->
+    <section class="view-section" id="view-orders">
+      
+      <!-- Controls -->
+      <div class="orders-controls">
+        <div class="orders-search-row">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="search-field" type="text" placeholder="Buscar por cliente, pedido, teléfono o dirección..." id="orderSearchInput" oninput="filterData()">
+          </div>
+          
+          <select class="select-field" id="deliveryFilter" onchange="filterData()">
+            <option value="todos">🚚 Todos los envíos</option>
+            <option value="delivery">🛵 Delivery</option>
+            <option value="takeaway">🏃 Retiro en local</option>
+          </select>
+          
+          <select class="select-field" id="paymentFilter" onchange="filterData()">
+            <option value="todos">💳 Todos los pagos</option>
+            <option value="efectivo">💵 Efectivo</option>
+            <option value="transferencia">📱 Transferencia</option>
+          </select>
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div class="status-tabs" id="statusTabsContainer">
+          <div class="status-tab active" data-status="todos" onclick="setStatusFilter('todos')">Todos</div>
+          <div class="status-tab" data-status="Pendiente" onclick="setStatusFilter('Pendiente')">Pendientes</div>
+          <div class="status-tab" data-status="En Preparación" onclick="setStatusFilter('En Preparación')">En Preparación</div>
+          <div class="status-tab" data-status="Enviado" onclick="setStatusFilter('Enviado')">Enviados</div>
+          <div class="status-tab" data-status="Entregado" onclick="setStatusFilter('Entregado')">Entregados</div>
+          <div class="status-tab" data-status="Cancelado" onclick="setStatusFilter('Cancelado')">Cancelados</div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-wrap">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Pedido</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Modalidad</th>
+                <th>Pago</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th style="text-align: center;">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <!-- Inyectado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-bar">
+          <div class="pag-info" id="paginationInfo">Mostrando 0-0 de 0 pedidos</div>
+          <div class="pag-buttons">
+            <button class="pag-btn" id="prevPageBtn" onclick="changePage(-1)">◀ Anterior</button>
+            <button class="pag-btn" id="nextPageBtn" onclick="changePage(1)">Siguiente ▶</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW: REPORTS -->
+    <section class="view-section" id="view-reports">
+      
+      <!-- Charts grid for reports -->
+      <div class="reports-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">🕒 Pedidos por Hora del Día</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="hoursChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">📅 Pedidos por Día de la Semana</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="weekdaysChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">💳 Distribución de Métodos de Pago</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="paymentsChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">📍 Resumen Geográfico / Localidad</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="zonesChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW: CATALOG -->
+    <section class="view-section" id="view-catalog">
+      <div class="orders-controls" style="margin-bottom: 24px;">
+        <div class="orders-search-row">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="search-field" type="text" placeholder="Buscar producto en el catálogo..." id="catalogSearchInput" oninput="filterCatalog()">
+          </div>
+          
+          <select class="select-field" id="catalogCategoryFilter" onchange="filterCatalog()">
+            <option value="todos">📁 Todas las categorías</option>
+            <option value="pollo-rebozado">🍗 Rebozados de Pollo</option>
+            <option value="pollo-granja">🐔 Granja y Cortes</option>
+            <option value="pescados-mariscos">🐟 Pescados y Mariscos</option>
+            <option value="veggie-soja">🌿 Veggie & Soja</option>
+            <option value="bocados-papas">🍟 Bocados & Papas</option>
+            <option value="almacen-huevos">🥚 Almacén y Huevos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="catalog-grid" id="catalogGrid">
+        <!-- Inyectado dinámicamente de data.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: ORDER DETAILS (TICKET SIMULATOR) -->
+  <div class="modal-overlay" id="orderModalOverlay" onclick="closeOrderModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-text" id="modalOrderTitle">Detalle de Pedido</div>
+        <button class="modal-close-btn" onclick="closeOrderModal()">✕</button>
+      </div>
+      
+      <div class="modal-body-scroll">
+        <!-- Ticket Simulador -->
+        <div class="receipt-paper">
+          <div class="receipt-header">
+            <div class="receipt-logo">PUNTO 25 DELIVERY</div>
+            <div class="receipt-subtitle">Granja, Rebozados y Congelados</div>
+            <div class="receipt-address">Corrientes 664, Barrio Norte</div>
+            <div class="receipt-divider"></div>
+          </div>
+          
+          <div class="receipt-meta">
+            <div class="receipt-meta-row">
+              <span>ID PEDIDO:</span>
+              <span id="ticketOrderId">#25-XXXX</span>
+            </div>
+            <div class="receipt-meta-row">
+              <span>FECHA:</span>
+              <span id="ticketDate">--/--/----</span>
+            </div>
+            <div class="receipt-meta-row">
+              <span>CLIENTE:</span>
+              <span id="ticketCustomer">--</span>
+            </div>
+            <div class="receipt-meta-row">
+              <span>TELÉFONO:</span>
+              <span id="ticketPhone">--</span>
+            </div>
+            <div class="receipt-meta-row">
+              <span>MODALIDAD:</span>
+              <span id="ticketMode">--</span>
+            </div>
+            <div class="receipt-meta-row">
+              <span>DIRECCIÓN:</span>
+              <span id="ticketAddress">--</span>
+            </div>
+            <div class="receipt-meta-row">
+              <span>PAGO:</span>
+              <span id="ticketPayment">--</span>
+            </div>
+            <div class="receipt-divider"></div>
+          </div>
+
+          <!-- Items list -->
+          <div class="receipt-items-container" id="ticketItems">
+            <!-- Inyectado -->
+          </div>
+
+          <div class="receipt-divider"></div>
+
+          <!-- Totals -->
+          <div class="receipt-totals">
+            <div class="receipt-total-row">
+              <span>Subtotal Productos:</span>
+              <span id="ticketSubtotal">$0</span>
+            </div>
+            <div class="receipt-total-row">
+              <span>Costo Envío:</span>
+              <span>¡Gratis! 🎉</span>
+            </div>
+            <div class="receipt-total-row main">
+              <span>TOTAL DE COMPRA:</span>
+              <span id="ticketTotal">$0</span>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="receipt-divider"></div>
+          <div style="font-size: 13px; font-weight: 600; color: #475569;">
+            <strong>Aclaraciones / Notas:</strong>
+            <p id="ticketNotes" style="font-style: italic; margin-top: 4px; font-weight: 500;"></p>
+          </div>
+
+          <div class="receipt-barcode">
+            <div class="barcode-lines">|||||| ||||| ||| ||||||| | ||||| | ||</div>
+            <div class="barcode-text" id="ticketBarcodeText">#25-XXXX</div>
+          </div>
+        </div>
+
+        <!-- Status Controller -->
+        <div class="status-controller-section">
+          <span class="status-control-label">Actualizar Estado Comercial</span>
+          <div id="statusBtnContainer" style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="status-actions-grid">
+              <button class="modal-action-btn btn-prep" onclick="updateStatus('En Preparación')">👨‍🍳 En Cocina</button>
+              <button class="modal-action-btn btn-send" onclick="updateStatus('Enviado')">🛵 En Camino</button>
+            </div>
+            <button class="modal-action-btn btn-done" onclick="updateStatus('Entregado')">✅ Entregado con Éxito</button>
+            <button class="modal-action-btn btn-cancel" onclick="updateStatus('Cancelado')">❌ Cancelar Pedido</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <span class="toast-icon" id="toastIcon">💾</span>
+    <span id="toastText">Operación realizada con éxito.</span>
+  </div>
+
+  <!-- LOAD CATALOG DATA first, then dashboard controller -->
+  <script src="data.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
