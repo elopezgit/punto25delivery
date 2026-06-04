@@ -1603,43 +1603,14 @@ function filterMenuByTag(tag) {
   }
 }
 
-// 5. MODO OSCURO INTELIGENTE Y AUTOMÁTICO
+// 5. MODO DÍA SIEMPRE ACTIVO (Modo oscuro desactivado a petición del cliente)
 function toggleTheme() {
-  const isDark = document.body.classList.toggle('dark');
-  safeStorage.setItem('p25_theme', isDark ? 'dark' : 'light');
-  
-  const toggleBtn = document.getElementById('themeToggleBtn');
-  if (toggleBtn) {
-    toggleBtn.textContent = isDark ? '☀️' : '🌙';
-  }
-  showToast(isDark ? "🌙 Modo Noche Activado" : "☀️ Modo Día Activado");
+  // Desactivado
 }
 
 function initTheme() {
-  const savedTheme = safeStorage.getItem('p25_theme');
-  const toggleBtn = document.getElementById('themeToggleBtn');
-  
-  if (savedTheme === 'dark') {
-    document.body.classList.add('dark');
-    if (toggleBtn) toggleBtn.textContent = '☀️';
-  } else if (savedTheme === 'light') {
-    document.body.classList.remove('dark');
-    if (toggleBtn) toggleBtn.textContent = '🌙';
-  } else {
-    // Si no hay preferencia del cliente, activar modo oscuro inteligente automáticamente según horario (19:30 a 07:00hs)
-    const now = new Date();
-    const hour = now.getHours();
-    const isNightTime = hour >= 19 || hour < 7;
-    
-    if (isNightTime) {
-      document.body.classList.add('dark');
-      if (toggleBtn) toggleBtn.textContent = '☀️';
-      console.log("Modo oscuro activado automáticamente de forma inteligente por horario nocturno.");
-    } else {
-      document.body.classList.remove('dark');
-      if (toggleBtn) toggleBtn.textContent = '🌙';
-    }
-  }
+  document.body.classList.remove('dark');
+  safeStorage.setItem('p25_theme', 'light');
 }
 
 // ─── AUDIO-FEEDBACK NATIVO (Web Audio API Synthesizers) ───
