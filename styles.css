@@ -477,6 +477,19 @@ body {
   gap: 4px;
 }
 
+.brand-hero-hours {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.15);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4;
+  flex-wrap: wrap;
+}
+
 .brand-hero-socials {
   display: flex;
   flex-direction: column;
@@ -1721,7 +1734,7 @@ body.dark .item-weight-badge {
   font-size: 17px;
   font-weight: 700;
   color: white;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .footer-address span {
@@ -1730,6 +1743,23 @@ body.dark .item-weight-badge {
   font-size: 14px;
   text-transform: uppercase;
   margin-bottom: 4px;
+}
+
+.footer-hours {
+  font-size: 15px;
+  font-weight: 500;
+  color: white;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.footer-hours span {
+  color: var(--gold);
+  display: block;
+  font-size: 14px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-weight: 700;
 }
 
 .footer-buttons {
