@@ -287,16 +287,71 @@ function checkStoreSchedule() {
   const day = now.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
   const hour = now.getHours();
   const min = now.getMinutes();
-  const timeVal = hour * 100 + min; // Formato hhmm (ej. 1430)
+  const timeVal = hour * 100 + min; // Formato hhmm (ej. 14:30 -> 1430)
   
   let isOpen = false;
   let statusText = '';
   
-  if (day >= 1 && day <= 6) { // Lunes a Sábado
-    const morningOpen = 930;
-    const morningClose = 1330;
-    const eveningOpen = 1730;
-    const eveningClose = 2130;
+  // Detectar feriados nacionales de Argentina
+  function getArgentineanHoliday(date) {
+    const m = date.getMonth() + 1;
+    const d = date.getDate();
+    const key = `${m}-${d}`;
+    const holidays = {
+      "1-1": "Año Nuevo",
+      "3-24": "Día de la Memoria",
+      "4-2": "Día de las Malvinas",
+      "4-3": "Viernes Santo",
+      "5-1": "Día del Trabajador",
+      "5-25": "Revolución de Mayo",
+      "6-15": "Día de Güemes",
+      "6-20": "Día de la Bandera",
+      "7-9": "Día de la Independencia",
+      "8-17": "Paso a la Inmortalidad de San Martín",
+      "10-12": "Día del Respeto a la Diversidad Cultural",
+      "11-23": "Día de la Soberanía Nacional",
+      "12-8": "Inmaculada Concepción",
+      "12-25": "Navidad"
+    };
+    return holidays[key] || null;
+  }
+  
+  const holidayName = getArgentineanHoliday(now);
+  
+  if (holidayName) {
+    // Feriados: 9 a 14 hs
+    const openTime = 900;
+    const closeTime = 1400;
+    if (timeVal >= openTime && timeVal <= closeTime) {
+      isOpen = true;
+      statusText = `Feriado (${holidayName}) · Abierto de 9 a 14hs`;
+    } else {
+      if (timeVal < openTime) {
+        statusText = `Cerrado · Hoy Feriado (${holidayName}) abrimos a las 09:00hs`;
+      } else {
+        statusText = `Cerrado hoy Feriado (${holidayName}) · Cerrado por el resto del día`;
+      }
+    }
+  } else if (day >= 1 && day <= 5) {
+    // Lunes a Viernes: Horario corrido 8:30 a 22 hs
+    const openTime = 830;
+    const closeTime = 2200;
+    if (timeVal >= openTime && timeVal <= closeTime) {
+      isOpen = true;
+      statusText = 'Abierto ahora · Entrega estimada 30-50 min';
+    } else {
+      if (timeVal < openTime) {
+        statusText = 'Cerrado ahora · Abrimos a las 08:30hs';
+      } else {
+        statusText = 'Cerrado ahora · Abrimos mañana a las 08:30hs';
+      }
+    }
+  } else if (day === 6) {
+    // Sábados: 9 a 14 hs y 17 a 22 hs
+    const morningOpen = 900;
+    const morningClose = 1400;
+    const eveningOpen = 1700;
+    const eveningClose = 2200;
     
     if ((timeVal >= morningOpen && timeVal <= morningClose) || 
         (timeVal >= eveningOpen && timeVal <= eveningClose)) {
@@ -304,15 +359,27 @@ function checkStoreSchedule() {
       statusText = 'Abierto ahora · Entrega estimada 30-50 min';
     } else {
       if (timeVal < morningOpen) {
-        statusText = 'Cerrado ahora · Abrimos a las 09:30hs';
+        statusText = 'Cerrado ahora · Abrimos a las 09:00hs';
       } else if (timeVal > morningClose && timeVal < eveningOpen) {
-        statusText = 'Cerrado ahora · Abrimos a las 17:30hs';
+        statusText = 'Cerrado ahora · Abrimos a las 17:00hs';
       } else {
-        statusText = 'Cerrado ahora · Abrimos mañana a las 09:30hs';
+        statusText = 'Cerrado ahora · Abrimos mañana (Domingo) a las 09:00hs';
       }
     }
-  } else { // Domingo cerrado
-    statusText = 'Cerrado hoy Domingo · Abrimos Lunes 09:30hs';
+  } else if (day === 0) {
+    // Domingos: 9 a 14 hs
+    const openTime = 900;
+    const closeTime = 1400;
+    if (timeVal >= openTime && timeVal <= closeTime) {
+      isOpen = true;
+      statusText = 'Abierto ahora · Entrega estimada 30-50 min';
+    } else {
+      if (timeVal < openTime) {
+        statusText = 'Cerrado ahora · Abrimos a las 09:00hs';
+      } else {
+        statusText = 'Cerrado hoy · Abrimos mañana (Lunes) a las 08:30hs';
+      }
+    }
   }
   
   // Actualizar indicador en UI
