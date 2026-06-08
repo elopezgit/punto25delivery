@@ -1198,26 +1198,21 @@ async function sendWhatsApp() {
         console.error("Error en envío por formulario oculto:", formErr);
       }
     } else {
-      console.log("Detectado protocolo web (HTTP/HTTPS). Registrando mediante fetch.");
-      try {
-        await Promise.race([
-          fetch(GOOGLE_SHEETS_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Evita errores de política CORS en solicitudes cruzadas locales
-            headers: {
-              'Content-Type': 'text/plain' // text/plain evita preflight CORS
-            },
-            body: JSON.stringify(sheetPayload)
-          }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Google Sheets Timeout')), 2200))
-        ]);
-        console.log("Pedido registrado en Google Sheets (fetch)");
-      } catch (err) {
-        // Nota: en no-cors, si Google redirige la petición, el navegador puede tirar un error de CORS
-        // aunque el servidor de Google ya haya recibido el POST y guardado la fila.
-        // No llamamos al fallback aquí para evitar que se registre dos veces si la primera ya llegó.
-        console.warn("Fallo o timeout en Google Sheets via fetch:", err);
-      }
+      console.log("Detectado protocolo web (HTTP/HTTPS). Registrando mediante fetch en background.");
+      // Usamos keepalive: true para asegurar que la solicitud continúe en segundo plano 
+      // y no usamos 'await' para que la redirección a WhatsApp sea inmediata y síncrona,
+      // evitando así que los bloqueadores de popups de iOS / iPhone interfieran.
+      fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        keepalive: true,
+        headers: {
+          'Content-Type': 'text/plain'
+        },
+        body: JSON.stringify(sheetPayload)
+      }).catch(err => {
+        console.warn("Fallo en registro en segundo plano de Google Sheets:", err);
+      });
     }
   }
 
