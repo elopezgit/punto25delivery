@@ -413,7 +413,7 @@ const MENU = [
     price: 16900,
     priceHalf: 8900,
     unitType: 'peso',
-    img: '',
+    img: 'img/productos/MEDALLONES DE MERLUZA.jfif',
     emoji: '🌈',
     tags: [],
     hot: false,
