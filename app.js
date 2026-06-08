@@ -536,28 +536,17 @@ function openProductModal(id) {
   if (categoryEl) categoryEl.textContent = (labels[item.cat] || 'Menú').toUpperCase();
   if (titleEl) titleEl.textContent = item.name;
   if (ratingEl) ratingEl.textContent = (item.rating || 4.8).toFixed(1);
-  if (descEl) descEl.textContent = item.desc;
-
-  if (ingSection && ingEl) {
-    if (item.ingredients) {
-      ingEl.textContent = item.ingredients;
-      ingSection.style.display = 'block';
-    } else {
-      ingSection.style.display = 'none';
-    }
+  if (descEl) {
+    descEl.textContent = item.desc;
+    descEl.style.display = 'none';
   }
 
-  if (prepSection && prepEl) {
-    if (item.prepDesc) {
-      let prepText = item.prepDesc;
-      if (item.prepTime) {
-        prepText += ` (Tiempo estimado: ${item.prepTime})`;
-      }
-      prepEl.textContent = prepText;
-      prepSection.style.display = 'block';
-    } else {
-      prepSection.style.display = 'none';
-    }
+  if (ingSection) {
+    ingSection.style.display = 'none';
+  }
+
+  if (prepSection) {
+    prepSection.style.display = 'none';
   }
 
   if (imgWrap) {
@@ -566,7 +555,8 @@ function openProductModal(id) {
     if (hasImage) {
       imgWrap.innerHTML = `
         <div class="pm-img-skeleton"></div>
-        <img src="${item.img}" alt="${item.name}" onload="this.previousElementSibling.remove()" onerror="this.previousElementSibling.remove(); this.style.display='none'; this.nextElementSibling.style.opacity='1';">
+        <img class="pm-img-bg" src="${item.img}" alt="" onerror="this.style.display='none'">
+        <img class="pm-img-main" src="${item.img}" alt="${item.name}" onload="this.previousElementSibling.previousElementSibling.remove()" onerror="this.previousElementSibling.previousElementSibling.remove(); this.style.display='none'; this.nextElementSibling.style.opacity='1';">
         <div class="pm-img-fallback" style="opacity:0">
           <span class="pm-fallback-emoji">${item.emoji}</span>
         </div>

@@ -2169,15 +2169,34 @@ body.dark .item-weight-badge {
 /* Cabecera visual del modal (Imagen o emoji) */
 .pm-image-wrap {
   width: 100%;
-  height: 220px;
+  height: 300px;
   position: relative;
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand2) 100%);
+  background: #0b0f19;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.pm-image-wrap img {
+.pm-img-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: blur(12px) brightness(0.6);
+  opacity: 0.75;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.pm-img-main {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 2;
   display: block;
 }
 
@@ -2275,6 +2294,7 @@ body.dark .item-weight-badge {
 }
 
 .pm-desc {
+  display: none;
   font-size: 17.5px;
   color: var(--text);
   line-height: 1.5;
@@ -2286,7 +2306,7 @@ body.dark .item-weight-badge {
 }
 
 .pm-info-section {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 6px;
   border-top: 1px dashed var(--border);
