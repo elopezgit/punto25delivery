@@ -338,7 +338,7 @@ function checkStoreSchedule() {
     const closeTime = 2200;
     if (timeVal >= openTime && timeVal <= closeTime) {
       isOpen = true;
-      statusText = 'Abierto ahora · Entrega estimada 30-50 min';
+      statusText = 'Abierto ahora';
     } else {
       if (timeVal < openTime) {
         statusText = 'Cerrado ahora · Abrimos a las 08:30hs';
@@ -356,7 +356,7 @@ function checkStoreSchedule() {
     if ((timeVal >= morningOpen && timeVal <= morningClose) || 
         (timeVal >= eveningOpen && timeVal <= eveningClose)) {
       isOpen = true;
-      statusText = 'Abierto ahora · Entrega estimada 30-50 min';
+      statusText = 'Abierto ahora';
     } else {
       if (timeVal < morningOpen) {
         statusText = 'Cerrado ahora · Abrimos a las 09:00hs';
@@ -372,7 +372,7 @@ function checkStoreSchedule() {
     const closeTime = 1400;
     if (timeVal >= openTime && timeVal <= closeTime) {
       isOpen = true;
-      statusText = 'Abierto ahora · Entrega estimada 30-50 min';
+      statusText = 'Abierto ahora';
     } else {
       if (timeVal < openTime) {
         statusText = 'Cerrado ahora · Abrimos a las 09:00hs';
