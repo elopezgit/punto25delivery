@@ -1225,8 +1225,14 @@ async function sendWhatsApp() {
   saveClientData();
   saveLastOrder();
 
-  // Abrir WhatsApp en pestaña nueva
-  window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+  // Abrir WhatsApp (usar redirección directa en móviles para evitar bloqueo de popups en iOS)
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`;
+  if (isMobile) {
+    window.location.href = waUrl;
+  } else {
+    window.open(waUrl, '_blank');
+  }
   
   // Cerrar el panel del carrito
   closeCart();
