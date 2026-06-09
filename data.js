@@ -215,7 +215,7 @@ const MENU = [
   {
     id: 13,
     cat: 'pollo-granja',
-    name: 'Pechuga Entera',
+    name: 'Filet de Pechuga Enteros',
     desc: 'Pechuga entera fresca, limpia y sin grasa de pollo de primera selección de granja.',
     ingredients: 'Pechuga de pollo fresca de granja deshuesada y desgrasada.',
     prepDesc: 'Ideal para hornear con manteca y limón, rellenar con verduras y queso, o trocear a gusto.',
@@ -549,7 +549,7 @@ const MENU = [
     price: 27900,
     priceHalf: 14800,
     unitType: 'peso',
-    img: 'img/productos/Filet de atún.jfif',
+    img: 'img/productos/filetatum.jfif',
     emoji: '🐟',
     tags: ['gourmet'],
     hot: false,
