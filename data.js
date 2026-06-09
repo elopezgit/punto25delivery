@@ -794,7 +794,7 @@ const MENU = [
     prepDesc: 'Conservar en lugar fresco. Ideales para tortillas, repostería o revueltos nutritivos cotidianos.',
     prepTime: 'fresco',
     price: 350,
-    unitType: 'unidad',
+    unitType: 'Unidad',
     img: 'img/productos/Huevo blanco por unidad.jfif',
     emoji: '🥚',
     tags: ['granja', 'fresco'],
