@@ -559,6 +559,19 @@ body {
   color: var(--brand-dark);
 }
 
+.promo-card.p4 {
+  background:
+    linear-gradient(135deg, rgba(117,170,219,0.85) 0%, rgba(255,255,255,0.7) 30%, rgba(117,170,219,0.75) 50%, rgba(255,255,255,0.7) 70%, rgba(117,170,219,0.85) 100%),
+    url('img/logo/argentina-team.jpg') center/cover no-repeat;
+  color: #003366;
+  border: 1.5px solid rgba(117, 170, 219, 0.5);
+}
+
+.promo-card.p4 .promo-badge {
+  background: #003366;
+  color: white;
+}
+
 .promo-emoji {
   position: absolute;
   right: 6px;
@@ -3083,7 +3096,7 @@ body.dark .copy-btn {
   /* 2. Promociones: Grilla de múltiples columnas en lugar de carrusel */
   .promo-scroll {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     overflow-x: visible;
     scroll-snap-type: none;

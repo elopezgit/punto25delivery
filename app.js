@@ -71,9 +71,17 @@ function scrollToPromo(idx) {
   const scroll = document.getElementById('promoScroll');
   const card = scroll ? scroll.querySelector('.promo-card') : null;
   if (scroll && card) {
-    const cardWidth = card.offsetWidth + 10; // ancho tarjeta + gap de 10px en flex
+    const cardWidth = card.offsetWidth + 10;
     scroll.scrollTo({ left: idx * cardWidth, behavior: 'smooth' });
   }
+}
+
+function promoCardCount() {
+  const scroll = document.getElementById('promoScroll');
+  if (!scroll) return 0;
+  const all = scroll.querySelectorAll('.promo-card');
+  // En mobile hay clones (mitad), en desktop no
+  return window.innerWidth < 768 ? all.length / 2 : all.length;
 }
 
 // ─── LOCAL STORAGE PERSISTENCE ───
@@ -1277,14 +1285,60 @@ function spawnParticle(id) {
 // ─── PROMOTIONS AUTOMATION ────────────────────────────────────────
 function initPromoDots() {
   const promoScroll = document.getElementById('promoScroll');
-  if (promoScroll) {
-    promoScroll.addEventListener('scroll', () => {
-      const idx = Math.round(promoScroll.scrollLeft / promoScroll.offsetWidth);
-      document.querySelectorAll('.promo-dots .dot').forEach((d, i) => {
-        d.classList.toggle('active', i === idx);
-      });
+  if (!promoScroll) return;
+  promoScroll.addEventListener('scroll', () => {
+    const total = promoCardCount();
+    if (!total) return;
+    const idx = Math.round(promoScroll.scrollLeft / promoScroll.offsetWidth) % total;
+    document.querySelectorAll('.promo-dots .dot').forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
     });
+  });
+}
+
+function initPromoAutoScroll() {
+  const promoScroll = document.getElementById('promoScroll');
+  const promoWrap = document.getElementById('fsPromo');
+  if (!promoScroll || !promoWrap) return;
+
+  // Solo en mobile (max 767px)
+  if (window.innerWidth >= 768) return;
+
+  const cards = promoScroll.querySelectorAll('.promo-card');
+  if (cards.length < 2) return;
+
+  // Clone all cards for seamless infinite loop
+  cards.forEach(c => {
+    const clone = c.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    promoScroll.appendChild(clone);
+  });
+
+  promoScroll.style.scrollSnapType = 'none';
+
+  let paused = false;
+  let rafId = null;
+  const speed = 0.5;
+
+  function tick() {
+    if (!paused) {
+      promoScroll.scrollLeft += speed;
+      if (promoScroll.scrollLeft >= promoScroll.scrollWidth / 2) {
+        promoScroll.scrollLeft = 0;
+      }
+    }
+    rafId = requestAnimationFrame(tick);
   }
+
+  function pause() { paused = true; }
+  function resume() { paused = false; }
+
+  promoWrap.addEventListener('mouseenter', pause);
+  promoWrap.addEventListener('mouseleave', resume);
+  promoWrap.addEventListener('touchstart', pause, { passive: true });
+  promoWrap.addEventListener('touchend', resume, { passive: true });
+
+  rafId = requestAnimationFrame(tick);
 }
 
 // ─── SCROLL INTERSECTION OBSERVERS ────────────────────────────────
@@ -1305,6 +1359,7 @@ function initScrollObserver() {
 function init() {
   filterCat('todos');
   initPromoDots();
+  initPromoAutoScroll();
   initScrollObserver();
   initSpotlightSearch();
   initTheme();
