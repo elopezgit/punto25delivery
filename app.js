@@ -467,9 +467,16 @@ function renderMenu(items) {
       priceLabelHTML = `${formatPrice(currentPrice)} <span class="price-unit">x ${unitText}</span>`;
     } else {
       let unitSuffix = 'Unidad';
-      if (item.cat === 'almacen-huevos' && item.id === 45) unitSuffix = 'Docena';
-      if (item.cat === 'almacen-huevos' && item.id === 46) unitSuffix = 'Bandeja';
-      priceLabelHTML = `${formatPrice(item.price)} <span class="price-unit">x ${unitSuffix}</span>`;
+      let suffixHTML = `x ${unitSuffix}`;
+      if (item.cat === 'almacen-huevos' && item.id === 45) {
+        unitSuffix = 'Por Unidad';
+        suffixHTML = 'Por Unidad';
+      }
+      if (item.cat === 'almacen-huevos' && item.id === 46) {
+        unitSuffix = 'Bandeja';
+        suffixHTML = `x ${unitSuffix}`;
+      }
+      priceLabelHTML = `${formatPrice(item.price)} <span class="price-unit">${suffixHTML}</span>`;
     }
 
     const tags = item.tags
@@ -662,11 +669,18 @@ function openProductModal(id) {
       
     } else {
       let unitSuffix = 'Unidad';
-      if (item.cat === 'almacen-huevos' && item.id === 45) unitSuffix = 'Docena';
-      if (item.cat === 'almacen-huevos' && item.id === 46) unitSuffix = 'Bandeja';
+      let suffixHTML = `x ${unitSuffix}`;
+      if (item.cat === 'almacen-huevos' && item.id === 45) {
+        unitSuffix = 'Por Unidad';
+        suffixHTML = 'Por Unidad';
+      }
+      if (item.cat === 'almacen-huevos' && item.id === 46) {
+        unitSuffix = 'Bandeja';
+        suffixHTML = `x ${unitSuffix}`;
+      }
       
       const updateModalPriceAndActionsUnit = () => {
-        priceVal.innerHTML = `${formatPrice(item.price)} <span class="pm-price-unit">x ${unitSuffix}</span>`;
+        priceVal.innerHTML = `${formatPrice(item.price)} <span class="pm-price-unit">${suffixHTML}</span>`;
         const cartKey = `${item.id}-unidad`;
         const qty = cart[cartKey] || 0;
         
@@ -968,7 +982,7 @@ function renderCartPanel() {
       optionLabel = opt === '0.5kg' ? ' x 500g' : (opt === '1kg' ? ' x 1kg' : ' x Unidad');
     } else {
       let unitSuffix = 'Unidad';
-      if (item.cat === 'almacen-huevos' && item.id === 45) unitSuffix = 'Docena';
+      if (item.cat === 'almacen-huevos' && item.id === 45) unitSuffix = 'Por Unidad';
       if (item.cat === 'almacen-huevos' && item.id === 46) unitSuffix = 'Bandeja';
       optionLabel = ` (${unitSuffix})`;
     }
@@ -1138,7 +1152,7 @@ async function sendWhatsApp() {
         optLabel = opt === '0.5kg' ? ' (500g)' : (opt === '1kg' ? ' (1kg)' : ' (Unidad)');
       } else {
         let suffix = 'Unidad';
-        if (item.cat === 'almacen-huevos' && item.id === 45) suffix = 'Docena';
+        if (item.cat === 'almacen-huevos' && item.id === 45) suffix = 'Por Unidad';
         if (item.cat === 'almacen-huevos' && item.id === 46) suffix = 'Bandeja';
         optLabel = ` (${suffix})`;
       }

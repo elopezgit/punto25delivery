@@ -323,7 +323,7 @@ function generateMockSales() {
         }
       } else {
         let suffix = "Unidad";
-        if (p.cat === "almacen-huevos" && p.id === 45) suffix = "Docena";
+        if (p.cat === "almacen-huevos" && p.id === 45) suffix = "Por Unidad";
         if (p.cat === "almacen-huevos" && p.id === 46) suffix = "Bandeja";
         optText = ` (${suffix})`;
       }
@@ -1192,10 +1192,23 @@ function renderCatalog() {
   
   MENU.forEach(p => {
     let unitSuffix = "Unidad";
-    if (p.unitType === "peso") unitSuffix = "Kilo";
-    else if (p.unitType === "mixto") unitSuffix = "Kilo / Unidad";
-    else if (p.cat === "almacen-huevos" && p.id === 45) unitSuffix = "Docena";
-    else if (p.cat === "almacen-huevos" && p.id === 46) unitSuffix = "Bandeja";
+    let suffixHTML = `x ${unitSuffix}`;
+    if (p.unitType === "peso") {
+      unitSuffix = "Kilo";
+      suffixHTML = `x ${unitSuffix}`;
+    }
+    else if (p.unitType === "mixto") {
+      unitSuffix = "Kilo / Unidad";
+      suffixHTML = `x ${unitSuffix}`;
+    }
+    else if (p.cat === "almacen-huevos" && p.id === 45) {
+      unitSuffix = "Por Unidad";
+      suffixHTML = "Por Unidad";
+    }
+    else if (p.cat === "almacen-huevos" && p.id === 46) {
+      unitSuffix = "Bandeja";
+      suffixHTML = `x ${unitSuffix}`;
+    }
 
     grid.innerHTML += `
       <div class="catalog-card" data-cat="${p.cat}" data-name="${p.name.toLowerCase()}">
@@ -1212,7 +1225,7 @@ function renderCatalog() {
         </div>
         
         <div class="cat-foot">
-          <div class="cat-price-val">$${p.price.toLocaleString('es-AR')} <span style="font-size:11.5px; font-weight:600; color:var(--text-light)">x ${unitSuffix}</span></div>
+          <div class="cat-price-val">$${p.price.toLocaleString('es-AR')} <span style="font-size:11.5px; font-weight:600; color:var(--text-light)">${suffixHTML}</span></div>
           <div class="cat-rating">⭐ ${p.rating ? p.rating.toFixed(1) : '4.8'}</div>
         </div>
       </div>`;
