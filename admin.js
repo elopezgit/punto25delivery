@@ -323,7 +323,6 @@ function generateMockSales() {
         }
       } else {
         let suffix = "Unidad";
-        if (p.cat === "almacen-huevos" && p.id === 45) suffix = "Por Unidad";
         if (p.cat === "almacen-huevos" && p.id === 46) suffix = "Bandeja";
         optText = ` (${suffix})`;
       }
@@ -1200,10 +1199,6 @@ function renderCatalog() {
     else if (p.unitType === "mixto") {
       unitSuffix = "Kilo / Unidad";
       suffixHTML = `x ${unitSuffix}`;
-    }
-    else if (p.cat === "almacen-huevos" && p.id === 45) {
-      unitSuffix = "Por Unidad";
-      suffixHTML = "Por Unidad";
     }
     else if (p.cat === "almacen-huevos" && p.id === 46) {
       unitSuffix = "Bandeja";
