@@ -572,6 +572,11 @@ body {
   color: white;
 }
 
+.promo-card.p5 {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
+  color: white;
+}
+
 .promo-emoji {
   position: absolute;
   right: 6px;
