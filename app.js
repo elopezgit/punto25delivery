@@ -1301,44 +1301,50 @@ function initPromoAutoScroll() {
   const promoWrap = document.getElementById('fsPromo');
   if (!promoScroll || !promoWrap) return;
 
-  // Solo en mobile (max 767px)
-  if (window.innerWidth >= 768) return;
-
   const cards = promoScroll.querySelectorAll('.promo-card');
   if (cards.length < 2) return;
 
-  // Clone all cards for seamless infinite loop
-  cards.forEach(c => {
-    const clone = c.cloneNode(true);
-    clone.setAttribute('aria-hidden', 'true');
-    promoScroll.appendChild(clone);
-  });
-
-  promoScroll.style.scrollSnapType = 'none';
-
+  let currentIndex = 0;
+  let intervalId = null;
   let paused = false;
-  let rafId = null;
-  const speed = 0.5;
 
-  function tick() {
-    if (!paused) {
-      promoScroll.scrollLeft += speed;
-      if (promoScroll.scrollLeft >= promoScroll.scrollWidth / 2) {
-        promoScroll.scrollLeft = 0;
-      }
+  function nextSlide() {
+    if (paused) return;
+    currentIndex++;
+    if (currentIndex >= cards.length) {
+      currentIndex = 0; // Rewind to first
     }
-    rafId = requestAnimationFrame(tick);
+    scrollToPromo(currentIndex);
   }
 
-  function pause() { paused = true; }
-  function resume() { paused = false; }
+  function startAutoPlay() {
+    if (!intervalId) {
+      intervalId = setInterval(nextSlide, 3500); // Change banner every 3.5 seconds
+    }
+  }
 
-  promoWrap.addEventListener('mouseenter', pause);
-  promoWrap.addEventListener('mouseleave', resume);
-  promoWrap.addEventListener('touchstart', pause, { passive: true });
-  promoWrap.addEventListener('touchend', resume, { passive: true });
+  function stopAutoPlay() {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  }
 
-  rafId = requestAnimationFrame(tick);
+  // Update current index when scrolled manually
+  promoScroll.addEventListener('scroll', () => {
+    const cardWidth = cards[0].offsetWidth + 10;
+    const newIndex = Math.round(promoScroll.scrollLeft / cardWidth);
+    if (newIndex >= 0 && newIndex < cards.length) {
+      currentIndex = newIndex;
+    }
+  });
+
+  promoWrap.addEventListener('mouseenter', () => { paused = true; });
+  promoWrap.addEventListener('mouseleave', () => { paused = false; });
+  promoWrap.addEventListener('touchstart', () => { paused = true; }, { passive: true });
+  promoWrap.addEventListener('touchend', () => { paused = false; }, { passive: true });
+
+  startAutoPlay();
 }
 
 // ─── SCROLL INTERSECTION OBSERVERS ────────────────────────────────
