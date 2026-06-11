@@ -132,61 +132,7 @@ function saveLastOrder() {
   safeStorage.setItem('p25_last_cart', JSON.stringify(cart));
 }
 
-function checkLastOrderHistory() {
-  const lastCartStr = safeStorage.getItem('p25_last_cart');
-  const banner = document.getElementById('historyBanner');
-  if (lastCartStr && banner) {
-    try {
-      const lastCart = JSON.parse(lastCartStr);
-      const keys = Object.keys(lastCart);
-      if (keys.length > 0) {
-        let descItems = [];
-        keys.slice(0, 3).forEach(key => {
-          const [idStr, opt] = key.split('-');
-          const item = MENU.find(i => i.id === parseInt(idStr));
-          if (item) {
-            const optText = (item.unitType === 'peso' || item.unitType === 'mixto') ? (opt === '0.5kg' ? '500g' : (opt === '1kg' ? '1kg' : 'Unid.')) : 'Unid.';
-            descItems.push(`${item.name} (${optText})`);
-          }
-        });
-        if (keys.length > 3) descItems.push('y más...');
-        
-        const descEl = document.getElementById('historyOrderDesc');
-        if (descEl) descEl.textContent = descItems.join(', ');
-        banner.style.display = 'flex';
-      } else {
-        banner.style.display = 'none';
-      }
-    } catch (e) {
-      banner.style.display = 'none';
-    }
-  } else if (banner) {
-    banner.style.display = 'none';
-  }
-}
 
-function loadLastOrder(event) {
-  if (event) event.stopPropagation();
-  const lastCartStr = safeStorage.getItem('p25_last_cart');
-  if (lastCartStr) {
-    try {
-      cart = JSON.parse(lastCartStr);
-      Object.keys(cart).forEach(key => {
-        const [idStr, opt] = key.split('-');
-        if (opt === '1kg' || opt === '0.5kg' || opt === 'unidad') {
-          selectedWeights[parseInt(idStr)] = opt;
-        }
-      });
-      renderMenu(currentCat === 'todos' ? MENU : MENU.filter(i => i.cat === currentCat));
-      updateCartBadge();
-      showToast('🛒 ¡Pedido anterior cargado con éxito!');
-      document.getElementById('historyBanner').style.display = 'none';
-      openCart();
-    } catch (e) {
-      showToast('⚠️ Error al cargar el historial');
-    }
-  }
-}
 
 // ─── FREE SHIPPING TRACKER ───
 function updateFreeShippingTracker(total) {
@@ -1108,32 +1054,12 @@ function sendWhatsApp() {
   if (!nombre || !tel) { showToast('⚠️ Completá tu nombre y teléfono'); return; }
   if (deliveryMode === 'delivery' && !dir) { showToast('⚠️ Ingresá tu dirección de entrega'); return; }
 
-  if (paymentMethod === 'transferencia') {
-    const overlay = document.getElementById('transferConfirmOverlay');
-    const modal = document.getElementById('transferConfirmModal');
-    if (overlay && modal) {
-      overlay.classList.add('open');
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    return;
-  }
+
 
   processWhatsAppOrder();
 }
 
-function closeTransferModal() {
-  const overlay = document.getElementById('transferConfirmOverlay');
-  const modal = document.getElementById('transferConfirmModal');
-  if (overlay) overlay.classList.remove('open');
-  if (modal) modal.classList.remove('open');
-  document.body.style.overflow = '';
-}
 
-function confirmTransferAndSend() {
-  closeTransferModal();
-  processWhatsAppOrder();
-}
 
 async function processWhatsAppOrder() {
   const nombre = document.getElementById('fNombre').value.trim();
@@ -1287,8 +1213,7 @@ async function processWhatsAppOrder() {
   
   showToast(`📲 Pedido ${orderId} enviado a WhatsApp`);
   
-  // Refrescar el historial de pedidos anteriores
-  setTimeout(checkLastOrderHistory, 1000);
+
 }
 
 // ─── TOAST NOTIFICATION ──────────────────────────────────────────
@@ -1405,7 +1330,7 @@ function init() {
   initSpotlightSearch();
   initTheme();
   loadClientData();
-  checkLastOrderHistory();
+
   checkStoreSchedule();
   
   // Chequeo automático de horario cada 30 segundos
