@@ -359,6 +359,19 @@ function checkStoreSchedule() {
   return isOpen;
 }
 
+// ─── FUNCIÓN PARA LEER STOCK DESDE ADMIN ─────────────────────────
+function getEnabledProducts() {
+  try {
+    const stockState = JSON.parse(localStorage.getItem('p25_stock_db') || '{}');
+    return MENU.filter(p => {
+      const s = stockState[p.id];
+      return s === undefined || s.enabled === true;
+    });
+  } catch (e) {
+    return MENU;
+  }
+}
+
 // ─── RENDER MENU ─────────────────────────────────────────────────
 function renderMenu(items) {
   const list = document.getElementById('menuList');
@@ -684,7 +697,8 @@ function closeProductModal() {
   if (modal) modal.classList.remove('open');
   document.body.style.overflow = '';
   
-  const activeItems = currentCat === 'todos' ? MENU : MENU.filter(i => i.cat === currentCat);
+  const enabledItems = getEnabledProducts();
+  const activeItems = currentCat === 'todos' ? enabledItems : enabledItems.filter(i => i.cat === currentCat);
   renderMenu(activeItems);
 }
 
@@ -716,7 +730,8 @@ function setWeightOption(id, option) {
     const el = document.getElementById('mi-' + id);
     if (el) {
       // Re-renderizamos los items de la categoría para refrescar de forma limpia
-      const activeItems = currentCat === 'todos' ? MENU : MENU.filter(i => i.cat === currentCat);
+      const enabledItems = getEnabledProducts();
+      const activeItems = currentCat === 'todos' ? enabledItems : enabledItems.filter(i => i.cat === currentCat);
       renderMenu(activeItems);
     }
   }
@@ -732,7 +747,8 @@ function filterCat(cat) {
     p.classList.toggle('active', p.dataset.cat === cat);
   });
 
-  const items = cat === 'todos' ? MENU : MENU.filter(i => i.cat === cat);
+  const enabledItems = getEnabledProducts();
+  const items = cat === 'todos' ? enabledItems : enabledItems.filter(i => i.cat === cat);
   const labels = {
     todos: '🍽️ Catálogo Completo',
     'pollo-rebozado': '🍗 Rebozados de Pollo',
@@ -753,7 +769,8 @@ function filterMenu() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   if (!q) { filterCat(currentCat); return; }
 
-  const items = MENU.filter(i =>
+  const enabledItems = getEnabledProducts();
+  const items = enabledItems.filter(i =>
     i.name.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q)
   );
   document.getElementById('menuTitle').textContent = `🔍 "${q}"`;
@@ -1538,7 +1555,7 @@ function initSpotlightSearch() {
       return;
     }
     
-    const matches = MENU.filter(item => 
+    const matches = getEnabledProducts().filter(item => 
       item.name.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q)
     ).slice(0, 5);
     
@@ -1593,20 +1610,21 @@ function filterMenuByTag(tag) {
     p.classList.toggle('active', p.dataset.tag === tag);
   });
   
+  const enabledItems = getEnabledProducts();
   let items = [];
   let titleText = '';
   
   if (tag === 'popular') {
-    items = MENU.filter(i => i.tags.includes('popular') || i.hot || i.rating >= 4.9);
+    items = enabledItems.filter(i => i.tags.includes('popular') || i.hot || i.rating >= 4.9);
     titleText = '🔥 Los Más Vendidos del Catálogo';
   } else if (tag === 'relleno') {
-    items = MENU.filter(i => i.tags.includes('relleno') || i.name.toLowerCase().includes('rellen') || i.name.toLowerCase().includes('mozzarella'));
+    items = enabledItems.filter(i => i.tags.includes('relleno') || i.name.toLowerCase().includes('rellen') || i.name.toLowerCase().includes('mozzarella'));
     titleText = '🧀 Exquisiteces con Queso & Rellenos';
   } else if (tag === 'saludable') {
-    items = MENU.filter(i => i.tags.includes('saludable') || i.cat === 'veggie-soja' || i.tags.includes('vegetariana'));
+    items = enabledItems.filter(i => i.tags.includes('saludable') || i.cat === 'veggie-soja' || i.tags.includes('vegetariana'));
     titleText = '🥗 Línea Fit & Saludable';
   } else if (tag === 'niños') {
-    items = MENU.filter(i => i.tags.includes('niños') || i.name.toLowerCase().includes('patitas') || i.name.toLowerCase().includes('nugget'));
+    items = enabledItems.filter(i => i.tags.includes('niños') || i.name.toLowerCase().includes('patitas') || i.name.toLowerCase().includes('nugget'));
     titleText = '👶 Menú Infantil Favorito';
   }
   

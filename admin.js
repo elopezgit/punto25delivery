@@ -187,6 +187,11 @@ async function fetchData() {
   }
 }
 
+// Normaliza un número de teléfono removiendo espacios, guiones, + y paréntesis para agrupar clientes correctamente
+function normalizePhone(phone) {
+  return phone.toString().replace(/[\s\-\+\(\)\.]/g, '').trim();
+}
+
 // Normaliza las columnas leídas del sheet por si hay discrepancias entre las del script de carga y las de app.js
 function normalizeOrderData(order) {
   // Asegurar que el total sea numérico y no falle por formateo de moneda del sheet
@@ -444,6 +449,7 @@ function updateDashboardMetrics() {
   
   // Renderizar estrella, analíticas avanzadas y vistas recientes
   renderStarProducts();
+  renderInsights();
   updateAdvancedAnalytics();
   renderRecentOrdersPreview();
 }
@@ -691,6 +697,70 @@ function renderOverviewCharts() {
   });
 }
 
+function renderInsights() {
+  const container = document.getElementById("insightsContent");
+  if (!container) return;
+  
+  const validOrders = allOrders.filter(o => o.estado !== "Cancelado");
+  
+  // 1. Día con más pedidos
+  const weekdayCounts = { 'Domingo': 0, 'Lunes': 0, 'Martes': 0, 'Miércoles': 0, 'Jueves': 0, 'Viernes': 0, 'Sábado': 0 };
+  const wdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  validOrders.forEach(o => {
+    const dayIdx = new Date(o.timestamp).getDay();
+    weekdayCounts[wdays[dayIdx]]++;
+  });
+  const bestDay = Object.entries(weekdayCounts).sort((a, b) => b[1] - a[1])[0];
+  
+  // 2. Hora pico
+  const hoursData = Array(24).fill(0);
+  validOrders.forEach(o => {
+    const hr = new Date(o.timestamp).getHours();
+    hoursData[hr]++;
+  });
+  const peakHour = hoursData.indexOf(Math.max(...hoursData));
+  
+  // 3. Producto más vendido
+  const countMap = {};
+  validOrders.forEach(o => {
+    const items = parseOrderItems(o.detalle);
+    items.forEach(item => {
+      if (!countMap[item.product.id]) {
+        countMap[item.product.id] = { product: item.product, count: 0, revenue: 0 };
+      }
+      countMap[item.product.id].count += item.qty;
+      countMap[item.product.id].revenue += item.subtotal;
+    });
+  });
+  const topProduct = Object.values(countMap).sort((a, b) => b.count - a.count)[0];
+  
+  // 4. Pedidos activos (no entregados ni cancelados)
+  const activeOrders = validOrders.filter(o => o.estado !== "Entregado" && o.estado !== "Cancelado").length;
+  
+  container.innerHTML = `
+    <div class="insight-item">
+      <div style="font-size:28px; margin-bottom:4px;">📅</div>
+      <div style="font-size:13px; color:var(--text-light); font-weight:600;">Día con más pedidos</div>
+      <div style="font-size:18px; font-weight:800; color:var(--brand2);">${bestDay ? `${bestDay[0]} (${bestDay[1]})` : 'Sin datos'}</div>
+    </div>
+    <div class="insight-item">
+      <div style="font-size:28px; margin-bottom:4px;">🕐</div>
+      <div style="font-size:13px; color:var(--text-light); font-weight:600;">Hora pico de pedidos</div>
+      <div style="font-size:18px; font-weight:800; color:var(--brand2);">${peakHour !== undefined ? `${peakHour}:00 - ${peakHour + 1}:00 hs` : 'Sin datos'}</div>
+    </div>
+    <div class="insight-item">
+      <div style="font-size:28px; margin-bottom:4px;">🏆</div>
+      <div style="font-size:13px; color:var(--text-light); font-weight:600;">Producto estrella</div>
+      <div style="font-size:18px; font-weight:800; color:var(--brand2);">${topProduct ? `${topProduct.product.emoji} ${topProduct.product.name} (${topProduct.count} unid.)` : 'Sin datos'}</div>
+    </div>
+    <div class="insight-item">
+      <div style="font-size:28px; margin-bottom:4px;">👨‍🍳</div>
+      <div style="font-size:13px; color:var(--text-light); font-weight:600;">Pedidos activos en cocina</div>
+      <div style="font-size:18px; font-weight:800; color:var(--brand2);">${activeOrders} pendientes</div>
+    </div>
+  `;
+}
+
 function renderStarProducts() {
   const validOrders = allOrders.filter(o => o.estado !== "Cancelado");
   const countMap = {};
@@ -751,13 +821,15 @@ function updateAdvancedAnalytics() {
   const customersMap = {};
   
   validOrders.forEach(o => {
-    const phone = o.tel.toString().trim();
-    if (!phone || phone === "--") return;
+    const rawPhone = o.tel.toString().trim();
+    const phone = normalizePhone(rawPhone);
+    if (!phone || phone === "--" || phone === "") return;
     
     if (!customersMap[phone]) {
       customersMap[phone] = {
         name: o.nombre,
-        phone: phone,
+        phone: rawPhone,
+        phoneNorm: phone,
         orderCount: 0,
         totalSpent: 0,
         lastOrderDate: o.timestamp
@@ -935,6 +1007,11 @@ function filterData() {
   const searchQ = document.getElementById("orderSearchInput").value.toLowerCase().trim();
   const deliveryF = document.getElementById("deliveryFilter").value;
   const paymentF = document.getElementById("paymentFilter").value;
+  const dateFrom = document.getElementById("dateFromFilter")?.value;
+  const dateTo = document.getElementById("dateToFilter")?.value;
+
+  let fromDate = dateFrom ? new Date(dateFrom + 'T00:00:00') : null;
+  let toDate = dateTo ? new Date(dateTo + 'T23:59:59') : null;
 
   filteredOrders = allOrders.filter(o => {
     // 1. Filtro por Estado
@@ -948,7 +1025,14 @@ function filterData() {
     if (paymentF === 'efectivo' && !o.paymentMethod.includes("Efectivo")) return false;
     if (paymentF === 'transferencia' && !o.paymentMethod.includes("Transferencia")) return false;
     
-    // 4. Filtro por Buscador
+    // 4. Filtro por Rango de Fechas
+    if (fromDate || toDate) {
+      const orderDate = new Date(o.timestamp);
+      if (fromDate && orderDate < fromDate) return false;
+      if (toDate && orderDate > toDate) return false;
+    }
+    
+    // 5. Filtro por Buscador
     if (searchQ) {
       const matchSearch = 
         o.orderId.toLowerCase().includes(searchQ) ||
@@ -1081,9 +1165,34 @@ function openOrderModal(orderId) {
   // Resaltar el botón del estado actual del pedido desactivando su opacidad o agregando un borde
   updateModalStatusButtons(order.estado);
 
+  // Poblar el selector de productos para edición
+  populateEditProductSelect();
+
+  // Resetear modo edición
+  isEditMode = false;
+  editOrderRef = null;
+  editingItems = [];
+  document.getElementById("orderEditPanel").style.display = 'none';
+  const editBtn = document.getElementById("editOrderToggleBtn");
+  if (editBtn) {
+    editBtn.textContent = '✏️ Editar Contenido del Pedido';
+    editBtn.className = 'modal-action-btn btn-edit';
+  }
+
   // Abrir Modal
   document.getElementById("orderModalOverlay").classList.add("open");
   document.body.style.overflow = "hidden";
+}
+
+function populateEditProductSelect() {
+  const select = document.getElementById("editProductSelect");
+  select.innerHTML = '<option value="">🔽 Agregar producto al pedido...</option>';
+  MENU.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.emoji} ${p.name} - $${p.price.toLocaleString('es-AR')}`;
+    select.appendChild(opt);
+  });
 }
 
 function updateModalStatusButtons(currentStatus) {
@@ -1111,9 +1220,14 @@ function updateModalStatusButtons(currentStatus) {
 
 function closeOrderModal() {
   playPopSound();
+  // Si estábamos en modo edición, cancelar
+  if (isEditMode) {
+    cancelOrderEdit();
+  }
   document.getElementById("orderModalOverlay").classList.remove("open");
   document.body.style.overflow = "";
   selectedOrder = null;
+  editOrderRef = null;
 }
 
 async function updateStatus(newState) {
@@ -1184,12 +1298,66 @@ function updateLocalState(orderId, newState) {
   updateDashboardMetrics();
 }
 
+// ─── GESTIÓN DE STOCK Y ESTADO DE PRODUCTOS ────────────────────────────
+let productStockState = null;
+
+function getStockState() {
+  if (productStockState) return productStockState;
+  const saved = localStorage.getItem('p25_stock_db');
+  if (saved) {
+    productStockState = JSON.parse(saved);
+  } else {
+    productStockState = {};
+    MENU.forEach(p => {
+      productStockState[p.id] = { enabled: true };
+    });
+    localStorage.setItem('p25_stock_db', JSON.stringify(productStockState));
+  }
+  return productStockState;
+}
+
+function toggleProductStock(productId) {
+  playPopSound();
+  const stock = getStockState();
+  stock[productId].enabled = !stock[productId].enabled;
+  localStorage.setItem('p25_stock_db', JSON.stringify(stock));
+  productStockState = stock;
+  renderCatalog();
+  const label = stock[productId].enabled ? 'habilitado' : 'deshabilitado (sin stock)';
+  showToast(`${MENU.find(p => p.id === productId).name} ${label}`, stock[productId].enabled ? '🟢' : '🔴');
+}
+
 // ─── VISUALIZADOR DE CATÁLOGO ───
 function renderCatalog() {
   const grid = document.getElementById("catalogGrid");
   grid.innerHTML = "";
+  const stockState = getStockState();
+  const stockFilter = document.getElementById('stockFilter')?.value || 'todos';
+  
+  // Estadísticas de stock
+  const totalProducts = MENU.length;
+  const enabledCount = MENU.filter(p => (stockState[p.id] || { enabled: true }).enabled).length;
+  const disabledCount = totalProducts - enabledCount;
+  
+  // Mostrar resumen de stock
+  const stockSummary = document.getElementById("stockSummary");
+  if (stockSummary) {
+    stockSummary.innerHTML = `
+      <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+        <span style="font-weight:700; color:var(--text);">📊 Resumen de Stock:</span>
+        <span style="color:#16a34a; font-weight:700;">🟢 ${enabledCount} habilitados</span>
+        <span style="color:var(--red); font-weight:700;">🔴 ${disabledCount} deshabilitados</span>
+        <span style="color:var(--text-light); font-weight:600;">📦 ${totalProducts} productos totales</span>
+      </div>`;
+  }
   
   MENU.forEach(p => {
+    const s = stockState[p.id] || { enabled: true };
+    
+    // Aplicar filtro de stock
+    if (stockFilter === 'enabled' && !s.enabled) return;
+    if (stockFilter === 'disabled' && s.enabled) return;
+    
     let unitSuffix = "Unidad";
     let suffixHTML = `x ${unitSuffix}`;
     if (p.unitType === "peso") {
@@ -1205,8 +1373,12 @@ function renderCatalog() {
       suffixHTML = `x ${unitSuffix}`;
     }
 
+    const stockClass = s.enabled ? 'stock-ok' : 'stock-out';
+    const stockLabel = s.enabled ? '🟢 Disponible' : '🔴 Sin Stock';
+    const toggleLabel = s.enabled ? '🔒 Deshabilitar' : '🔓 Habilitar';
+
     grid.innerHTML += `
-      <div class="catalog-card" data-cat="${p.cat}" data-name="${p.name.toLowerCase()}">
+      <div class="catalog-card ${stockClass}" data-cat="${p.cat}" data-name="${p.name.toLowerCase()}" data-enabled="${s.enabled}">
         <div>
           <div class="cat-head">
             <div class="cat-emoji-wrap">${p.emoji}</div>
@@ -1221,7 +1393,13 @@ function renderCatalog() {
         
         <div class="cat-foot">
           <div class="cat-price-val">$${p.price.toLocaleString('es-AR')} <span style="font-size:11.5px; font-weight:600; color:var(--text-light)">${suffixHTML}</span></div>
-          <div class="cat-rating">⭐ ${p.rating ? p.rating.toFixed(1) : '4.8'}</div>
+          <div>
+            <div class="cat-rating">⭐ ${p.rating ? p.rating.toFixed(1) : '4.8'}</div>
+            <div class="cat-stock-indicator ${stockClass}" onclick="toggleProductStock(${p.id})" title="Habilitar/Deshabilitar producto">${stockLabel}</div>
+          </div>
+        </div>
+        <div style="margin-top:8px; border-top:1px solid var(--border); padding-top:8px; display:flex; justify-content:center;">
+          <button class="stock-toggle-btn" onclick="event.stopPropagation(); toggleProductStock(${p.id})">${toggleLabel}</button>
         </div>
       </div>`;
   });
@@ -1230,6 +1408,9 @@ function renderCatalog() {
 function filterCatalog() {
   const searchQ = document.getElementById("catalogSearchInput").value.toLowerCase().trim();
   const catFilter = document.getElementById("catalogCategoryFilter").value;
+  
+  // Re-render completo cuando cambia el filtro de stock para aplicar correctamente
+  renderCatalog();
   
   const cards = document.querySelectorAll("#catalogGrid .catalog-card");
   cards.forEach(card => {
@@ -1245,6 +1426,244 @@ function filterCatalog() {
       card.style.display = "none";
     }
   });
+}
+
+// ─── EDICIÓN DE CONTENIDO DE PEDIDOS ──────────────────────────────────
+let editingItems = [];
+let isEditMode = false;
+let editOrderRef = null;
+
+function toggleOrderEditMode() {
+  playPopSound();
+  const editPanel = document.getElementById("orderEditPanel");
+  const editToggleBtn = document.getElementById("editOrderToggleBtn");
+  
+  isEditMode = !isEditMode;
+  
+  if (isEditMode) {
+    // Inicializar items editables desde el detalle actual
+    const items = parseOrderItems(selectedOrder.detalle);
+    editingItems = items.map(item => ({
+      product: item.product,
+      qty: item.qty,
+      option: getItemOption(item),
+      unitPrice: item.unitPrice,
+      subtotal: item.subtotal
+    }));
+    editOrderRef = selectedOrder;
+    editToggleBtn.textContent = '↩️ Cancelar Edición';
+    editToggleBtn.className = 'modal-action-btn btn-cancel';
+    renderEditItems();
+  } else {
+    cancelOrderEdit();
+  }
+  
+  editPanel.style.display = isEditMode ? 'block' : 'none';
+}
+
+function getItemOption(item) {
+  if (item.product.unitType === 'peso') {
+    return item.unitPrice === item.product.priceHalf ? '500g' : '1kg';
+  } else if (item.product.unitType === 'mixto') {
+    if (item.unitPrice === item.product.priceUnit) return 'Unidad';
+    if (item.unitPrice === item.product.priceHalf) return '500g';
+    return '1kg';
+  }
+  return null;
+}
+
+function renderEditItems() {
+  const container = document.getElementById("editItemsContainer");
+  container.innerHTML = "";
+  
+  if (editingItems.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-light);font-weight:600;">No hay productos en el pedido. Agregue productos abajo.</div>`;
+    updateEditTotal();
+    return;
+  }
+  
+  editingItems.forEach((item, idx) => {
+    const optionText = item.option ? ` (${item.option})` : '';
+    container.innerHTML += `
+      <div class="edit-item-row">
+        <div class="edit-item-info">
+          <span class="edit-item-emoji">${item.product.emoji}</span>
+          <div>
+            <div class="edit-item-name">${item.product.name}${optionText}</div>
+            <div class="edit-item-price">$${item.unitPrice.toLocaleString('es-AR')} c/u</div>
+          </div>
+        </div>
+        <div class="edit-item-controls">
+          <button class="edit-qty-btn" onclick="changeEditItemQty(${idx}, -1)">−</button>
+          <span class="edit-qty-val">${item.qty}</span>
+          <button class="edit-qty-btn" onclick="changeEditItemQty(${idx}, 1)">+</button>
+          <button class="edit-remove-btn" onclick="removeEditItem(${idx})">🗑️</button>
+        </div>
+      </div>`;
+  });
+  
+  updateEditTotal();
+}
+
+function changeEditItemQty(idx, delta) {
+  if (idx < 0 || idx >= editingItems.length) return;
+  const newQty = editingItems[idx].qty + delta;
+  if (newQty < 1) return;
+  editingItems[idx].qty = newQty;
+  editingItems[idx].subtotal = editingItems[idx].unitPrice * newQty;
+  renderEditItems();
+}
+
+function removeEditItem(idx) {
+  if (idx < 0 || idx >= editingItems.length) return;
+  editingItems.splice(idx, 1);
+  renderEditItems();
+}
+
+function addItemToOrder() {
+  const select = document.getElementById("editProductSelect");
+  const option = parseInt(select.value);
+  if (!option) return;
+  
+  const product = MENU.find(p => p.id === option);
+  if (!product) return;
+  
+  // Determinar precio y opción por defecto
+  let unitPrice = product.price;
+  let optText = null;
+  
+  if (product.unitType === 'peso') {
+    unitPrice = product.price;
+    optText = '1kg';
+  } else if (product.unitType === 'mixto') {
+    unitPrice = product.price;
+    optText = '1kg';
+  } else {
+    unitPrice = product.price;
+    optText = null;
+  }
+  
+  // Verificar si ya existe para sumar cantidad
+  const existing = editingItems.findIndex(
+    item => item.product.id === product.id && item.option === optText
+  );
+  
+  if (existing !== -1) {
+    editingItems[existing].qty += 1;
+    editingItems[existing].subtotal = editingItems[existing].unitPrice * editingItems[existing].qty;
+  } else {
+    editingItems.push({
+      product: product,
+      qty: 1,
+      option: optText,
+      unitPrice: unitPrice,
+      subtotal: unitPrice
+    });
+  }
+  
+  select.value = "";
+  renderEditItems();
+  showToast(`${product.emoji} ${product.name} agregado al pedido`, '➕');
+}
+
+function updateEditTotal() {
+  const total = editingItems.reduce((sum, item) => sum + item.subtotal, 0);
+  document.getElementById("editTotalDisplay").textContent = `$${total.toLocaleString('es-AR')}`;
+}
+
+function rebuildOrderDetalle() {
+  const lines = editingItems.map(item => {
+    const optText = item.option ? ` (${item.option})` : '';
+    const total = item.unitPrice * item.qty;
+    return `${item.qty}x ${item.product.emoji} ${item.product.name}${optText} — $${total.toLocaleString('es-AR')}`;
+  });
+  return lines.join('\n');
+}
+
+function cancelOrderEdit() {
+  isEditMode = false;
+  editOrderRef = null;
+  editingItems = [];
+  document.getElementById("orderEditPanel").style.display = 'none';
+  const btn = document.getElementById("editOrderToggleBtn");
+  if (btn) {
+    btn.textContent = '✏️ Editar Contenido del Pedido';
+    btn.className = 'modal-action-btn btn-edit';
+  }
+}
+
+async function saveOrderChanges() {
+  if (!editOrderRef || editingItems.length === 0) {
+    showToast('El pedido debe tener al menos un producto', '⚠️');
+    return;
+  }
+  
+  playPopSound();
+  const newDetalle = rebuildOrderDetalle();
+  const newTotal = editingItems.reduce((sum, item) => sum + item.subtotal, 0);
+  const oldTotal = editOrderRef.total;
+  
+  // Agregar nota de modificación
+  const modNote = `[MODIFICADO ${new Date().toLocaleString('es-AR')}] Se editó el contenido del pedido.`;
+  const existingNotes = editOrderRef.notes && !editOrderRef.notes.includes('MODIFICADO') ? editOrderRef.notes : '';
+  const newNotes = existingNotes ? `${existingNotes}\n${modNote}` : modNote;
+  
+  // Actualizar en memoria
+  editOrderRef.detalle = newDetalle;
+  editOrderRef.total = newTotal;
+  editOrderRef.notes = newNotes;
+  
+  // Si el estado es "Entregado" o "Cancelado", lo revertimos a "En Preparación" para indicar cambio
+  if (editOrderRef.estado === 'Entregado' || editOrderRef.estado === 'Cancelado') {
+    editOrderRef.estado = 'En Preparación';
+  }
+  
+  // Guardar en localStorage
+  localStorage.setItem("p25_orders_db", JSON.stringify(allOrders));
+  
+  // Intentar sincronizar con Google Sheets
+  try {
+    if (GOOGLE_SHEETS_URL && GOOGLE_SHEETS_URL !== "" && !GOOGLE_SHEETS_URL.includes("macros/s/Reemplazar")) {
+      const payload = {
+        action: 'updateOrder',
+        orderId: editOrderRef.orderId,
+        detalle: newDetalle,
+        total: newTotal,
+        notes: newNotes,
+        estado: editOrderRef.estado
+      };
+      
+      fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).then(r => r.json()).catch(() => {});
+    }
+  } catch (e) {}
+  
+  // Salir del modo edición y refrescar
+  const savedId = editOrderRef.orderId;
+  cancelOrderEdit();
+  closeOrderModal();
+  filterData();
+  updateDashboardMetrics();
+  showToast(`✅ Pedido ${savedId} modificado con éxito`, '✅');
+}
+
+// ─── EXPORTAR REPORTES A PDF / IMPRESIÓN ─────────────────────────────
+function printReports() {
+  playPopSound();
+  
+  // Cambiar temporalmente a vista reports para asegurar gráficos renderizados
+  if (activeView !== 'reports') {
+    switchView('reports');
+  }
+  
+  // Esperar a que se rendericen los gráficos
+  setTimeout(() => {
+    window.print();
+  }, 500);
 }
 
 // ─── TOAST NOTIFICATION PREMIUM ──────────────────────────────────────

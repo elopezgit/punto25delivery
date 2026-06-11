@@ -919,7 +919,8 @@
       text-align: center;
     }
     .status-badge.pendiente { background: rgba(249, 115, 22, 0.12); color: var(--orange); border: 1px solid rgba(249, 115, 22, 0.2); }
-    .status-badge.preparacion { background: rgba(59, 130, 246, 0.12); color: var(--blue); border: 1px solid rgba(59, 130, 246, 0.2); }
+    .status-badge.preparacion,
+    .status-badge.en-preparacion { background: rgba(59, 130, 246, 0.12); color: var(--blue); border: 1px solid rgba(59, 130, 246, 0.2); }
     .status-badge.enviado { background: rgba(0, 164, 228, 0.1); color: var(--brand); border: 1px solid rgba(0, 164, 228, 0.2); }
     .status-badge.entregado { background: rgba(37, 211, 102, 0.12); color: #16a34a; border: 1px solid rgba(37, 211, 102, 0.2); }
     .status-badge.cancelado { background: rgba(239, 104, 104, 0.12); color: var(--red); border: 1px solid rgba(239, 104, 104, 0.2); }
@@ -1385,6 +1386,283 @@
       }
     }
 
+    /* ─── STOCK INDICATOR & TOGGLE ─── */
+    .catalog-card.stock-out {
+      opacity: 0.7;
+      border-color: var(--red) !important;
+    }
+    .cat-stock-indicator {
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 2px;
+      transition: var(--transition);
+    }
+    .cat-stock-indicator.stock-ok {
+      color: #16a34a;
+    }
+    .cat-stock-indicator.stock-out {
+      color: var(--red);
+    }
+    .stock-toggle-btn {
+      padding: 5px 14px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--text-light);
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .stock-toggle-btn:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+    }
+
+    /* ─── INSIGHTS ─── */
+    .insight-item {
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      text-align: center;
+      transition: var(--transition);
+    }
+    .insight-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ─── ORDER EDIT PANEL ─── */
+    .edit-panel {
+      margin-top: 16px;
+      background: var(--bg);
+      border: 1.5px solid var(--brand);
+      border-radius: 16px;
+      padding: 16px;
+      display: none;
+    }
+    .edit-section-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--brand);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .edit-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .edit-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .edit-item-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+    .edit-item-emoji {
+      font-size: 20px;
+    }
+    .edit-item-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .edit-item-price {
+      font-size: 12px;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+    .edit-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .edit-qty-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .edit-qty-btn:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+    }
+    .edit-qty-val {
+      font-weight: 800;
+      font-size: 16px;
+      min-width: 24px;
+      text-align: center;
+    }
+    .edit-remove-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid transparent;
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--red);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .edit-remove-btn:hover {
+      background: var(--red);
+      color: white;
+    }
+    .edit-add-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1.5px solid var(--border);
+    }
+    .edit-add-row select {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+      outline: none;
+    }
+    .edit-add-btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      background: var(--brand);
+      color: white;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+    .edit-add-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .edit-total-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 2px solid var(--brand);
+    }
+    .edit-total-label {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-light);
+    }
+    .edit-total-value {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--brand);
+    }
+    .edit-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .modal-action-btn.btn-edit {
+      background: var(--brand2);
+    }
+    body.dark .modal-action-btn.btn-edit {
+      background: #1e40af;
+    }
+    .modal-action-btn.btn-save {
+      background: var(--green);
+      flex: 1;
+    }
+
+    /* ─── PRINT STYLES ─── */
+    @media print {
+      .sidebar, .top-bar, .sync-btn, .connection-badge, .preview-btn,
+      .action-cell-btn, .modal-overlay, .toast, .pag-btn, .status-tabs,
+      .orders-controls, select, button:not(.print-keep), .stock-toggle-btn,
+      #loginOverlay {
+        display: none !important;
+      }
+      .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 10px !important;
+      }
+      .view-section {
+        display: block !important;
+      }
+      .view-section:not(.active) {
+        display: none !important;
+      }
+      .kpi-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 12px !important;
+      }
+      .kpi-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        break-inside: avoid;
+      }
+      .chart-card {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        min-height: auto !important;
+      }
+      .reports-grid {
+        break-inside: avoid;
+      }
+      .dashboard-bottom-grid {
+        break-inside: avoid;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .catalog-card {
+        break-inside: avoid;
+      }
+      .chart-canvas-wrap {
+        min-height: 200px !important;
+      }
+      .receipt-paper {
+        border: 1px solid #ccc !important;
+      }
+    }
+
     @media (max-width: 480px) {
       .kpi-grid {
         grid-template-columns: 1fr;
@@ -1569,6 +1847,16 @@
         </div>
       </div>
 
+      <!-- Insights Card -->
+      <div class="preview-card" style="margin-bottom:24px;" id="insightsCard">
+        <div class="preview-header">
+          <h3 class="preview-title">💡 Insights Rápidos</h3>
+        </div>
+        <div id="insightsContent" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; padding:8px 0;">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </div>
+
       <!-- Bottom Dashboard Grid -->
       <div class="dashboard-bottom-grid">
         <div class="preview-card">
@@ -1629,6 +1917,14 @@
           </select>
         </div>
 
+        <!-- Date Range Filters -->
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <label style="font-size:13px; font-weight:700; color:var(--text-light);">📅 Desde:</label>
+          <input type="date" class="search-field" id="dateFromFilter" onchange="filterData()" style="width:auto; padding:8px 12px; font-size:14px;">
+          <label style="font-size:13px; font-weight:700; color:var(--text-light);">Hasta:</label>
+          <input type="date" class="search-field" id="dateToFilter" onchange="filterData()" style="width:auto; padding:8px 12px; font-size:14px;">
+        </div>
+
         <!-- Status Filter Tabs -->
         <div class="status-tabs" id="statusTabsContainer">
           <div class="status-tab active" data-status="todos" onclick="setStatusFilter('todos')">Todos</div>
@@ -1677,6 +1973,13 @@
     <!-- VIEW: REPORTS -->
     <section class="view-section" id="view-reports">
       
+      <!-- Print Button -->
+      <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+        <button class="sync-btn" onclick="printReports()" style="background:var(--brand); color:white; border-color:var(--brand);">
+          <span>🖨️</span> Exportar / Imprimir Reporte PDF
+        </button>
+      </div>
+
       <!-- Charts grid for reports -->
       <div class="reports-grid">
         <div class="chart-card">
@@ -1827,9 +2130,18 @@
             <option value="bocados-papas">🍟 Bocados & Papas</option>
             <option value="almacen-huevos">🥚 Almacén y Huevos</option>
           </select>
+          
+          <select class="select-field" id="stockFilter" onchange="filterCatalog()">
+            <option value="todos">📦 Todos los productos</option>
+            <option value="enabled">🟢 Solo disponibles</option>
+            <option value="disabled">🔴 Solo sin stock</option>
+          </select>
         </div>
       </div>
 
+      <div id="stockSummary" style="margin-bottom:16px; padding:12px 16px; background:var(--surface); border:1.5px solid var(--border); border-radius:12px;">
+        <!-- Inyectado dinámicamente -->
+      </div>
       <div class="catalog-grid" id="catalogGrid">
         <!-- Inyectado dinámicamente de data.js -->
       </div>
@@ -1933,6 +2245,36 @@
             </div>
             <button class="modal-action-btn btn-done" onclick="updateStatus('Entregado')">✅ Entregado con Éxito</button>
             <button class="modal-action-btn btn-cancel" onclick="updateStatus('Cancelado')">❌ Cancelar Pedido</button>
+          </div>
+        </div>
+
+        <!-- Order Edit Controller -->
+        <div class="status-controller-section" style="margin-top:12px;">
+          <button class="modal-action-btn btn-edit" id="editOrderToggleBtn" onclick="toggleOrderEditMode()" style="width:100%;">✏️ Editar Contenido del Pedido</button>
+          
+          <div class="edit-panel" id="orderEditPanel">
+            <div class="edit-section-title">✏️ Editando Productos del Pedido</div>
+            
+            <div class="edit-items-list" id="editItemsContainer">
+              <!-- Inyectado dinámicamente -->
+            </div>
+            
+            <div class="edit-add-row">
+              <select id="editProductSelect">
+                <option value="">🔽 Agregar producto al pedido...</option>
+              </select>
+              <button class="edit-add-btn" onclick="addItemToOrder()">➕ Agregar</button>
+            </div>
+            
+            <div class="edit-total-bar">
+              <span class="edit-total-label">Nuevo Total:</span>
+              <span class="edit-total-value" id="editTotalDisplay">$0</span>
+            </div>
+            
+            <div class="edit-actions">
+              <button class="modal-action-btn btn-cancel" onclick="toggleOrderEditMode()" style="flex:1;">↩️ Cancelar</button>
+              <button class="modal-action-btn btn-save" onclick="saveOrderChanges()">💾 Guardar Cambios</button>
+            </div>
           </div>
         </div>
       </div>

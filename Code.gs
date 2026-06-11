@@ -200,6 +200,78 @@ function doPost(e) {
         throw new Error("No se encontró ningún pedido con el ID: " + orderId);
       }
       
+    } else if (params.action === "updateOrder") {
+      // ─── ACTUALIZAR CONTENIDO COMPLETO DE UN PEDIDO ───
+      var orderId = params.orderId;
+      var newDetalle = params.detalle;
+      var newTotal = params.total;
+      var newNotes = params.notes;
+      var newEstado = params.estado;
+      
+      var orderIdCol = findColumnIndex(headers, "orderId");
+      var detalleCol = findColumnIndex(headers, "detalle");
+      var totalCol = findColumnIndex(headers, "total");
+      var notesCol = findColumnIndex(headers, "notes");
+      var estadoCol = findColumnIndex(headers, "estado");
+      
+      if (orderIdCol === -1) {
+        throw new Error("No se encontró la columna del identificador de pedido.");
+      }
+      
+      if (estadoCol === -1) {
+        sheet.getRange(1, headers.length + 1).setValue("Estado");
+        estadoCol = headers.length;
+        range = sheet.getDataRange();
+        values = range.getValues();
+        headers = values[0];
+      }
+      
+      if (detalleCol === -1) {
+        sheet.getRange(1, headers.length + 1).setValue("Detalle del Pedido");
+        detalleCol = headers.length;
+        range = sheet.getDataRange();
+        values = range.getValues();
+        headers = values[0];
+      }
+      
+      if (totalCol === -1) {
+        sheet.getRange(1, headers.length + 1).setValue("Total de Compra");
+        totalCol = headers.length;
+        range = sheet.getDataRange();
+        values = range.getValues();
+        headers = values[0];
+      }
+      
+      if (notesCol === -1) {
+        sheet.getRange(1, headers.length + 1).setValue("Notas / Aclaraciones");
+        notesCol = headers.length;
+        range = sheet.getDataRange();
+        values = range.getValues();
+        headers = values[0];
+      }
+      
+      var foundRowIndex = -1;
+      for (var i = 1; i < values.length; i++) {
+        if (String(values[i][orderIdCol]).trim() === String(orderId).trim()) {
+          foundRowIndex = i + 1;
+          break;
+        }
+      }
+      
+      if (foundRowIndex !== -1) {
+        if (detalleCol !== -1) sheet.getRange(foundRowIndex, detalleCol + 1).setValue(newDetalle);
+        if (totalCol !== -1) sheet.getRange(foundRowIndex, totalCol + 1).setValue(newTotal);
+        if (notesCol !== -1) sheet.getRange(foundRowIndex, notesCol + 1).setValue(newNotes);
+        if (estadoCol !== -1) sheet.getRange(foundRowIndex, estadoCol + 1).setValue(newEstado);
+        
+        result = {
+          status: "success",
+          message: "Pedido " + orderId + " actualizado correctamente."
+        };
+      } else {
+        throw new Error("No se encontró ningún pedido con el ID: " + orderId);
+      }
+      
     } else {
       // ─── REGISTRO DE UN NUEVO PEDIDO (CHECKOUT COMPATIBILITY) ───
       var idxs = {};
