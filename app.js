@@ -1100,7 +1100,42 @@ function copyToClipboard(elementId, successMsg) {
 }
 
 // ─── SEND WHATSAPP ORDER ──────────────────────────────────────────
-async function sendWhatsApp() {
+function sendWhatsApp() {
+  const nombre = document.getElementById('fNombre').value.trim();
+  const tel = document.getElementById('fTel').value.trim();
+  const dir = document.getElementById('fDir').value.trim();
+
+  if (!nombre || !tel) { showToast('⚠️ Completá tu nombre y teléfono'); return; }
+  if (deliveryMode === 'delivery' && !dir) { showToast('⚠️ Ingresá tu dirección de entrega'); return; }
+
+  if (paymentMethod === 'transferencia') {
+    const overlay = document.getElementById('transferConfirmOverlay');
+    const modal = document.getElementById('transferConfirmModal');
+    if (overlay && modal) {
+      overlay.classList.add('open');
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    return;
+  }
+
+  processWhatsAppOrder();
+}
+
+function closeTransferModal() {
+  const overlay = document.getElementById('transferConfirmOverlay');
+  const modal = document.getElementById('transferConfirmModal');
+  if (overlay) overlay.classList.remove('open');
+  if (modal) modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function confirmTransferAndSend() {
+  closeTransferModal();
+  processWhatsAppOrder();
+}
+
+async function processWhatsAppOrder() {
   const nombre = document.getElementById('fNombre').value.trim();
   const tel = document.getElementById('fTel').value.trim();
   const dir = document.getElementById('fDir').value.trim();

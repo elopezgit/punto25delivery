@@ -361,6 +361,22 @@
     </div>
   </div>
 
+  <!-- TRANSFER CONFIRM MODAL -->
+  <div class="product-modal-overlay" id="transferConfirmOverlay" onclick="closeTransferModal()"></div>
+  <div class="product-modal" id="transferConfirmModal">
+    <button class="pm-close-btn" onclick="closeTransferModal()">✕</button>
+    <div class="pm-content-wrap" style="text-align: center; padding-top: 40px; padding-bottom: 20px;">
+      <div style="font-size: 50px; margin-bottom: 10px;">⚠️</div>
+      <h2 class="pm-title" style="margin-bottom: 15px;">Aviso Importante</h2>
+      <p class="pm-desc" style="display: block; font-size: 16px; margin-bottom: 25px; line-height: 1.5;">
+        Por favor, <strong>esperá a que te confirmemos el stock</strong> por WhatsApp antes de realizar la transferencia.<br><br>Una vez confirmado, podrás enviarnos el comprobante.
+      </p>
+      <button class="pm-add-cart-btn" onclick="confirmTransferAndSend()" style="width: 100%; margin-bottom: 10px;">
+        Entendido, enviar pedido
+      </button>
+    </div>
+  </div>
+
   <!-- DIGITAL RECEIPT MODAL (Recibo Físico Simulador) -->
   <div class="receipt-overlay" id="receiptOverlay" onclick="closeReceiptModal()"></div>
   <canvas id="celebrationCanvas"
