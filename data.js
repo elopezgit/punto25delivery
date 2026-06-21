@@ -816,6 +816,23 @@ const MENU = [
     tags: ['granja', 'ahorro'],
     hot: false,
     rating: 4.8
+  },
+  {
+    id: 49,
+    cat: 'carne-vacuna',
+    name: 'Milanesas de Peceto',
+    desc: 'Milanesas de peceto, súper tiernas, rebozadas y listas para cocinar.',
+    ingredients: 'Peceto de ternera y rebozado.',
+    prepDesc: 'Listas para cocinar al horno o freír.',
+    prepTime: '12 min',
+    price: 35000,
+    priceHalf: 17500,
+    unitType: 'peso',
+    img: 'img/productos/Milanesas de Peceto.jpeg',
+    emoji: '🥩',
+    tags: ['popular'],
+    hot: true,
+    rating: 4.9
   }
 ];
 

@@ -486,6 +486,7 @@ function openProductModal(id) {
 
   const labels = {
     'pollo-rebozado': 'Rebozados de Pollo',
+    'carne-vacuna': 'Carne Vacuna',
     'pollo-granja': 'Granja y Cortes',
     'pescados-mariscos': 'Mar y Río (Pescados)',
     'veggie-soja': 'Veggie & Soja',
@@ -752,6 +753,7 @@ function filterCat(cat) {
   const labels = {
     todos: '🍽️ Catálogo Completo',
     'pollo-rebozado': '🍗 Rebozados de Pollo',
+    'carne-vacuna': '🥩 Carne Vacuna',
     'pollo-granja': '🐔 Granja y Cortes',
     'pescados-mariscos': '🐟 Mar y Río (Pescados)',
     'veggie-soja': '🌿 Veggie & Soja',
