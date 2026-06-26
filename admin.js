@@ -1355,7 +1355,8 @@ function renderCatalog() {
         <span style="color:#16a34a; font-weight:700;">🟢 ${enabledCount} habilitados</span>
         <span style="color:var(--red); font-weight:700;">🔴 ${disabledCount} deshabilitados</span>
         <span style="color:var(--text-light); font-weight:600;">📦 ${totalProducts} productos totales</span>
-        <button onclick="openProductModal()" class="action-cell-btn" style="background:var(--brand); color:white; margin-left:auto;">➕ Nuevo Producto</button>
+        <button onclick="seedGoogleSheetsCatalog()" class="action-cell-btn" style="background:#eab308; color:black; margin-left:auto; font-weight:bold; margin-right:10px;">⬆️ Migrar Catálogo Inicial</button>
+        <button onclick="openProductModal()" class="action-cell-btn" style="background:var(--brand); color:white;">➕ Nuevo Producto</button>
       </div>`;
   }
   
@@ -1832,7 +1833,7 @@ async function saveProduct(e) {
 
 async function deleteProduct(id) {
   playPopSound();
-  if (!confirm("�Est�s seguro de que deseas eliminar este producto permanentemente?")) return;
+  if (!confirm("�Est�s seguro de que deseas eliminar este producto permanentemente?")) return;
   
   const idx = MENU.findIndex(x => x.id === id);
   if (idx === -1) return;
@@ -1857,3 +1858,33 @@ async function deleteProduct(id) {
   }
 }
 
+
+
+async function seedGoogleSheetsCatalog() {
+  playPopSound();
+  if (!confirm("¿Seguro que quieres migrar todo el catálogo a Google Sheets? Esto sobreescribirá la pestaña Catalogo.")) return;
+  
+  showToast("Enviando catálogo, no cierres esta ventana...", "⏳");
+  try {
+    if (GOOGLE_SHEETS_URL && GOOGLE_SHEETS_URL !== "" && !GOOGLE_SHEETS_URL.includes("macros/s/Reemplazar")) {
+      const payload = { action: 'seedCatalog', products: MENU };
+      const res = await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+      if (result.status === "success") {
+        showToast("Catálogo migrado exitosamente", "✅");
+      } else {
+        throw new Error(result.message);
+      }
+    } else {
+      showToast("Error de URL de Google Sheets", "❌");
+    }
+  } catch (e) {
+    console.error("Error seeding catalog:", e);
+    showToast("Error al migrar catálogo", "❌");
+  }
+}

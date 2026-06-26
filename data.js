@@ -4,7 +4,7 @@ const INSTAGRAM_USER = 'punto25delivery';
 const ADDRESS_TEXT = 'Corrientes 664, Barrio Norte';
 // Pegar aquí la URL del Web App obtenida al desplegar el script en Google Apps Script:
 
-const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxRoqoO5gvZ-QB1ufOLybPjNuzJ5jTB4kIUAfVLpkOCrJQxomjXLsYQ2rdCLS0esLqpYQ/exec'; // URL real de Google Apps Script provista por el cliente
+const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxwajWTwVZdcIGt01bZZEkeknUFUPpJV8V1RT219Kb87LIhICFy19ThhRMQ1A2-QbK1Uw/exec'; // URL real de Google Apps Script provista por el cliente
 
 const DEFAULT_MENU = [
   // ── COLUMNA IZQUIERDA: REBOZADOS Y GRANJA DE POLLO ──────────────────────────

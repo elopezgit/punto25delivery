@@ -354,6 +354,32 @@ function doPost(e) {
       }
       result = { status: "success", message: "Stock actualizado" };
 
+    } else if (params.action === "seedCatalog") {
+      var catSheet = ss.getSheetByName("Catalogo");
+      if (!catSheet) {
+        catSheet = ss.insertSheet("Catalogo");
+      } else {
+        // Clear existing data to avoid duplicates during seeding
+        catSheet.clear();
+      }
+      
+      catSheet.appendRow(["id", "cat", "name", "desc", "ingredients", "prepDesc", "prepTime", "price", "priceHalf", "unitType", "img", "emoji", "tags", "hot", "rating", "enabled"]);
+      
+      var products = params.products || [];
+      var rows = [];
+      for (var k = 0; k < products.length; k++) {
+        var p = products[k];
+        rows.push([
+          p.id, p.cat, p.name, p.desc || "", p.ingredients || "", p.prepDesc || "", p.prepTime || "", p.price, p.priceHalf || 0, p.unitType, p.img || "", p.emoji, (p.tags||[]).join(","), p.hot||false, p.rating||4.8, p.enabled!==false
+        ]);
+      }
+      
+      if (rows.length > 0) {
+        catSheet.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
+      }
+      
+      result = { status: "success", message: "Catálogo sembrado con " + rows.length + " productos" };
+
     } else {
       // ─── REGISTRO DE UN NUEVO PEDIDO (CHECKOUT COMPATIBILITY) ───
       var idxs = {};
