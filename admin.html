@@ -2149,6 +2149,76 @@
 
   </main>
 
+  <!-- MODAL: PRODUCT CRUD -->
+  <div class="modal-overlay" id="productModalOverlay" onclick="closeProductModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-text" id="modalProductTitle">Nuevo Producto</div>
+        <button class="modal-close-btn" onclick="closeProductModal()">✕</button>
+      </div>
+      
+      <div class="modal-body-scroll" style="padding: 20px;">
+        <form id="productForm" onsubmit="saveProduct(event)">
+          <input type="hidden" id="prodId">
+          
+          <div style="margin-bottom: 12px;">
+            <label style="display:block; font-weight: 600; font-size: 13px; margin-bottom: 4px; color: var(--text-light)">Nombre del Producto</label>
+            <input type="text" id="prodName" required style="width:100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px;">
+          </div>
+          
+          <div style="display:flex; gap: 12px; margin-bottom: 12px;">
+            <div style="flex:1;">
+              <label style="display:block; font-weight: 600; font-size: 13px; margin-bottom: 4px; color: var(--text-light)">Categoría</label>
+              <select id="prodCat" required style="width:100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px;">
+                <option value="rebozados">🍗 Rebozados Pollo</option>
+                <option value="con-queso">🧀 Con Queso</option>
+                <option value="fresco">🐓 Fresco & Granja</option>
+                <option value="cerdo">🐖 Cerdo</option>
+                <option value="papas-fritas">🍟 Papas Fritas</option>
+                <option value="mar-rio">🐟 Mar y Río</option>
+                <option value="burgers">🍔 Hamburguesas</option>
+                <option value="panaderia">🥖 Panadería</option>
+                <option value="veggie-soja">🌱 Veggie & Soja</option>
+                <option value="almacen-huevos">🥚 Almacén y Huevos</option>
+              </select>
+            </div>
+            <div style="width: 80px;">
+              <label style="display:block; font-weight: 600; font-size: 13px; margin-bottom: 4px; color: var(--text-light)">Emoji</label>
+              <input type="text" id="prodEmoji" required style="width:100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; text-align:center;">
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 12px;">
+            <label style="display:block; font-weight: 600; font-size: 13px; margin-bottom: 4px; color: var(--text-light)">Descripción</label>
+            <textarea id="prodDesc" rows="2" style="width:100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; resize:none;"></textarea>
+          </div>
+          
+          <div style="display:flex; gap: 12px; margin-bottom: 12px;">
+            <div style="flex:1;">
+              <label style="display:block; font-weight: 600; font-size: 13px; margin-bottom: 4px; color: var(--text-light)">Precio ($)</label>
+              <input type="number" id="prodPrice" required min="0" style="width:100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px;">
+            </div>
+            <div style="flex:1;">
+              <label style="display:block; font-weight: 600; font-size: 13px; margin-bottom: 4px; color: var(--text-light)">Tipo Unidad</label>
+              <select id="prodUnitType" style="width:100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px;">
+                <option value="peso">Por Peso (Kilo/Medio)</option>
+                <option value="unidad">Por Unidad</option>
+                <option value="mixto">Mixto (Unidad y Kilo)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label style="display:block; font-weight: 600; font-size: 13px; margin-bottom: 4px; color: var(--text-light)">URL de Imagen (Opcional)</label>
+            <input type="url" id="prodImg" placeholder="https://..." style="width:100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px;">
+          </div>
+          
+          <button type="submit" class="modal-action-btn" style="width:100%; background:var(--brand); color:white; border:none;">💾 Guardar Producto</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: ORDER DETAILS (TICKET SIMULATOR) -->
   <div class="modal-overlay" id="orderModalOverlay" onclick="closeOrderModal()">
     <div class="modal-card" onclick="event.stopPropagation()">

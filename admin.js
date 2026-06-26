@@ -1299,44 +1299,51 @@ function updateLocalState(orderId, newState) {
 }
 
 // ─── GESTIÓN DE STOCK Y ESTADO DE PRODUCTOS ────────────────────────────
-let productStockState = null;
 
-function getStockState() {
-  if (productStockState) return productStockState;
-  const saved = localStorage.getItem('p25_stock_db');
-  if (saved) {
-    productStockState = JSON.parse(saved);
-  } else {
-    productStockState = {};
-    MENU.forEach(p => {
-      productStockState[p.id] = { enabled: true };
-    });
-    localStorage.setItem('p25_stock_db', JSON.stringify(productStockState));
-  }
-  return productStockState;
-}
-
-function toggleProductStock(productId) {
+async function toggleProductStock(productId) {
   playPopSound();
-  const stock = getStockState();
-  stock[productId].enabled = !stock[productId].enabled;
-  localStorage.setItem('p25_stock_db', JSON.stringify(stock));
-  productStockState = stock;
-  renderCatalog();
-  const label = stock[productId].enabled ? 'habilitado' : 'deshabilitado (sin stock)';
-  showToast(`${MENU.find(p => p.id === productId).name} ${label}`, stock[productId].enabled ? '🟢' : '🔴');
+  const p = MENU.find(x => x.id === productId);
+  if (!p) return;
+  
+  p.enabled = !p.enabled;
+  renderCatalog(); // Optimistic UI update
+  const label = p.enabled ? 'habilitado' : 'deshabilitado (sin stock)';
+  showToast(`${p.name} ${label}`, p.enabled ? '🟢' : '🔴');
+  
+  try {
+    if (GOOGLE_SHEETS_URL && GOOGLE_SHEETS_URL !== "" && !GOOGLE_SHEETS_URL.includes("macros/s/Reemplazar")) {
+      const payload = {
+        action: 'toggleProductStock',
+        id: productId,
+        enabled: p.enabled
+      };
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      // Optionally update cache
+      localStorage.setItem("p25_catalog_db", JSON.stringify(MENU));
+    }
+  } catch(e) {
+    console.error("Error al sincronizar stock:", e);
+    showToast("Error al guardar en base de datos. Se revirtió el cambio.", "❌");
+    p.enabled = !p.enabled; // Revert
+    renderCatalog();
+  }
 }
 
 // ─── VISUALIZADOR DE CATÁLOGO ───
 function renderCatalog() {
   const grid = document.getElementById("catalogGrid");
+  if (!grid) return;
   grid.innerHTML = "";
-  const stockState = getStockState();
   const stockFilter = document.getElementById('stockFilter')?.value || 'todos';
   
   // Estadísticas de stock
   const totalProducts = MENU.length;
-  const enabledCount = MENU.filter(p => (stockState[p.id] || { enabled: true }).enabled).length;
+  const enabledCount = MENU.filter(p => p.enabled !== false).length;
   const disabledCount = totalProducts - enabledCount;
   
   // Mostrar resumen de stock
@@ -1348,15 +1355,16 @@ function renderCatalog() {
         <span style="color:#16a34a; font-weight:700;">🟢 ${enabledCount} habilitados</span>
         <span style="color:var(--red); font-weight:700;">🔴 ${disabledCount} deshabilitados</span>
         <span style="color:var(--text-light); font-weight:600;">📦 ${totalProducts} productos totales</span>
+        <button onclick="openProductModal()" class="action-cell-btn" style="background:var(--brand); color:white; margin-left:auto;">➕ Nuevo Producto</button>
       </div>`;
   }
   
   MENU.forEach(p => {
-    const s = stockState[p.id] || { enabled: true };
+    const isEnabled = p.enabled !== false;
     
     // Aplicar filtro de stock
-    if (stockFilter === 'enabled' && !s.enabled) return;
-    if (stockFilter === 'disabled' && s.enabled) return;
+    if (stockFilter === 'enabled' && !isEnabled) return;
+    if (stockFilter === 'disabled' && isEnabled) return;
     
     let unitSuffix = "Unidad";
     let suffixHTML = `x ${unitSuffix}`;
@@ -1373,12 +1381,12 @@ function renderCatalog() {
       suffixHTML = `x ${unitSuffix}`;
     }
 
-    const stockClass = s.enabled ? 'stock-ok' : 'stock-out';
-    const stockLabel = s.enabled ? '🟢 Disponible' : '🔴 Sin Stock';
-    const toggleLabel = s.enabled ? '🔒 Deshabilitar' : '🔓 Habilitar';
+    const stockClass = isEnabled ? 'stock-ok' : 'stock-out';
+    const stockLabel = isEnabled ? '🟢 Disponible' : '🔴 Sin Stock';
+    const toggleLabel = isEnabled ? '🔒 Deshabilitar' : '🔓 Habilitar';
 
     grid.innerHTML += `
-      <div class="catalog-card ${stockClass}" data-cat="${p.cat}" data-name="${p.name.toLowerCase()}" data-enabled="${s.enabled}">
+      <div class="catalog-card ${stockClass}" data-cat="${p.cat}" data-name="${p.name.toLowerCase()}">
         <div>
           <div class="cat-head">
             <div class="cat-emoji-wrap">${p.emoji}</div>
@@ -1398,8 +1406,10 @@ function renderCatalog() {
             <div class="cat-stock-indicator ${stockClass}" onclick="toggleProductStock(${p.id})" title="Habilitar/Deshabilitar producto">${stockLabel}</div>
           </div>
         </div>
-        <div style="margin-top:8px; border-top:1px solid var(--border); padding-top:8px; display:flex; justify-content:center;">
+        <div style="margin-top:8px; border-top:1px solid var(--border); padding-top:8px; display:flex; justify-content:center; gap: 8px;">
           <button class="stock-toggle-btn" onclick="event.stopPropagation(); toggleProductStock(${p.id})">${toggleLabel}</button>
+          <button class="stock-toggle-btn" style="background:#475569; color:white;" onclick="event.stopPropagation(); openProductModal(${p.id})">✏️ Editar</button>
+          <button class="stock-toggle-btn" style="background:var(--red); color:white; width: 40px;" onclick="event.stopPropagation(); deleteProduct(${p.id})">🗑️</button>
         </div>
       </div>`;
   });
@@ -1718,3 +1728,132 @@ function initTheme() {
     }
   }
 }
+
+// --- PRODUCT CRUD ----------------------------------------------
+function openProductModal(id = null) {
+  playPopSound();
+  const modal = document.getElementById('productModalOverlay');
+  const title = document.getElementById('modalProductTitle');
+  const form = document.getElementById('productForm');
+  
+  if (id) {
+    const p = MENU.find(x => x.id === id);
+    if (!p) return;
+    title.textContent = 'Editar Producto';
+    document.getElementById('prodId').value = p.id;
+    document.getElementById('prodName').value = p.name;
+    document.getElementById('prodCat').value = p.cat;
+    document.getElementById('prodEmoji').value = p.emoji;
+    document.getElementById('prodDesc').value = p.desc || '';
+    document.getElementById('prodPrice').value = p.price;
+    document.getElementById('prodUnitType').value = p.unitType;
+    document.getElementById('prodImg').value = p.img || '';
+  } else {
+    title.textContent = 'Nuevo Producto';
+    form.reset();
+    document.getElementById('prodId').value = '';
+  }
+  
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProductModal() {
+  playPopSound();
+  document.getElementById('productModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function saveProduct(e) {
+  e.preventDefault();
+  playPopSound();
+  const btn = e.target.querySelector('button[type="submit"]');
+  const originalText = btn.textContent;
+  btn.textContent = 'Guardando...';
+  btn.disabled = true;
+  
+  let id = document.getElementById('prodId').value;
+  if (!id) {
+    id = Date.now(); // Generate new ID
+  } else {
+    id = parseInt(id);
+  }
+  
+  const isNew = !MENU.find(x => x.id === id);
+  const p = {
+    id: id,
+    name: document.getElementById('prodName').value,
+    cat: document.getElementById('prodCat').value,
+    emoji: document.getElementById('prodEmoji').value,
+    desc: document.getElementById('prodDesc').value,
+    price: parseInt(document.getElementById('prodPrice').value),
+    priceHalf: 0,
+    unitType: document.getElementById('prodUnitType').value,
+    img: document.getElementById('prodImg').value,
+    enabled: true,
+    rating: 4.8,
+    hot: false,
+    tags: []
+  };
+  
+  if (p.unitType === 'peso' || p.unitType === 'mixto') {
+    p.priceHalf = p.price / 2;
+  }
+  
+  try {
+    if (GOOGLE_SHEETS_URL && GOOGLE_SHEETS_URL !== "" && !GOOGLE_SHEETS_URL.includes("macros/s/Reemplazar")) {
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        body: JSON.stringify({ action: 'saveProduct', product: p })
+      });
+    }
+    
+    if (isNew) {
+      MENU.push(p);
+    } else {
+      const idx = MENU.findIndex(x => x.id === id);
+      if (idx !== -1) MENU[idx] = Object.assign(MENU[idx], p);
+    }
+    
+    localStorage.setItem("p25_catalog_db", JSON.stringify(MENU));
+    renderCatalog();
+    closeProductModal();
+    showToast("Producto guardado correctamente", "?");
+  } catch (error) {
+    console.error("Error al guardar:", error);
+    showToast("Error al guardar producto", "?");
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+async function deleteProduct(id) {
+  playPopSound();
+  if (!confirm("�Est�s seguro de que deseas eliminar este producto permanentemente?")) return;
+  
+  const idx = MENU.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  
+  try {
+    if (GOOGLE_SHEETS_URL && GOOGLE_SHEETS_URL !== "" && !GOOGLE_SHEETS_URL.includes("macros/s/Reemplazar")) {
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        body: JSON.stringify({ action: 'deleteProduct', id: id })
+      });
+    }
+    
+    MENU.splice(idx, 1);
+    localStorage.setItem("p25_catalog_db", JSON.stringify(MENU));
+    renderCatalog();
+    showToast("Producto eliminado", "???");
+  } catch (error) {
+    console.error("Error al eliminar:", error);
+    showToast("Error al eliminar producto", "?");
+  }
+}
+

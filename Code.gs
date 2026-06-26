@@ -272,6 +272,88 @@ function doPost(e) {
         throw new Error("No se encontró ningún pedido con el ID: " + orderId);
       }
       
+    } else if (params.action === "getCatalog") {
+      var catSheet = ss.getSheetByName("Catalogo");
+      if (!catSheet) throw new Error("No existe pestaña Catalogo");
+      
+      var data = [];
+      var range = catSheet.getDataRange();
+      var values = range.getValues();
+      if (values.length > 1) {
+        var heads = values[0];
+        for (var i = 1; i < values.length; i++) {
+          var row = values[i];
+          var obj = {};
+          for (var j = 0; j < heads.length; j++) {
+            obj[heads[j]] = row[j];
+          }
+          data.push(obj);
+        }
+      }
+      result = { status: "success", data: data };
+
+    } else if (params.action === "saveProduct") {
+      var catSheet = ss.getSheetByName("Catalogo");
+      if (!catSheet) {
+        catSheet = ss.insertSheet("Catalogo");
+        catSheet.appendRow(["id", "cat", "name", "desc", "ingredients", "prepDesc", "prepTime", "price", "priceHalf", "unitType", "img", "emoji", "tags", "hot", "rating", "enabled"]);
+      }
+      
+      var p = params.product;
+      var range = catSheet.getDataRange();
+      var values = range.getValues();
+      var heads = values[0];
+      
+      var foundRow = -1;
+      for (var i = 1; i < values.length; i++) {
+        if (String(values[i][heads.indexOf("id")]) === String(p.id)) {
+          foundRow = i + 1;
+          break;
+        }
+      }
+      
+      var rowData = [
+        p.id, p.cat, p.name, p.desc, p.ingredients, p.prepDesc, p.prepTime, p.price, p.priceHalf, p.unitType, p.img, p.emoji, p.tags, p.hot, p.rating, p.enabled
+      ];
+      
+      if (foundRow !== -1) {
+        catSheet.getRange(foundRow, 1, 1, rowData.length).setValues([rowData]);
+      } else {
+        catSheet.appendRow(rowData);
+      }
+      result = { status: "success", message: "Producto guardado correctamente" };
+
+    } else if (params.action === "deleteProduct") {
+      var catSheet = ss.getSheetByName("Catalogo");
+      if (catSheet) {
+        var range = catSheet.getDataRange();
+        var values = range.getValues();
+        var heads = values[0];
+        for (var i = 1; i < values.length; i++) {
+          if (String(values[i][heads.indexOf("id")]) === String(params.id)) {
+            catSheet.deleteRow(i + 1);
+            break;
+          }
+        }
+      }
+      result = { status: "success", message: "Producto eliminado" };
+
+    } else if (params.action === "toggleProductStock") {
+      var catSheet = ss.getSheetByName("Catalogo");
+      if (catSheet) {
+        var range = catSheet.getDataRange();
+        var values = range.getValues();
+        var heads = values[0];
+        var enabledCol = heads.indexOf("enabled") + 1;
+        for (var i = 1; i < values.length; i++) {
+          if (String(values[i][heads.indexOf("id")]) === String(params.id)) {
+            catSheet.getRange(i + 1, enabledCol).setValue(params.enabled);
+            break;
+          }
+        }
+      }
+      result = { status: "success", message: "Stock actualizado" };
+
     } else {
       // ─── REGISTRO DE UN NUEVO PEDIDO (CHECKOUT COMPATIBILITY) ───
       var idxs = {};

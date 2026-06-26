@@ -6,7 +6,7 @@ const ADDRESS_TEXT = 'Corrientes 664, Barrio Norte';
 
 const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxPBn2bWx4mr8Csru-FLmcejJaqq_vQwDmvK9u_4snMTs09vP7jrok7LNw5IFnK2UStSw/exec'; // URL real de Google Apps Script provista por el cliente
 
-const MENU = [
+const DEFAULT_MENU = [
   // ── COLUMNA IZQUIERDA: REBOZADOS Y GRANJA DE POLLO ──────────────────────────
   {
     id: 1,
@@ -835,6 +835,8 @@ const MENU = [
     rating: 4.9
   }
 ];
+
+let MENU = [...DEFAULT_MENU];
 
 // Ajustar dinámicamente el precio de medio kilo para que sea exactamente la mitad del precio del kilo
 MENU.forEach(item => {

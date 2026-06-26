@@ -1336,12 +1336,53 @@ function initScrollObserver() {
       }
     });
   }, { threshold: 0.1 });
-
   document.querySelectorAll('.fade-section').forEach(el => observer.observe(el));
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────
+async function loadCatalog() {
+  try {
+    const cached = safeStorage.getItem("p25_catalog_db");
+    if (cached) {
+      MENU = JSON.parse(cached);
+      if (typeof filterCat === 'function' && !document.getElementById('catalogGrid')) filterCat(currentCat);
+    }
+    const response = await fetch(GOOGLE_SHEETS_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "getCatalog" })
+    });
+    const result = await response.json();
+    if (result.status === "success" && result.data && result.data.length > 0) {
+      MENU = result.data.map(p => ({
+        id: parseInt(p.id),
+        cat: p.cat,
+        name: p.name,
+        desc: p.desc,
+        ingredients: p.ingredients,
+        prepDesc: p.prepDesc,
+        prepTime: p.prepTime,
+        price: parseInt(p.price),
+        priceHalf: parseInt(p.priceHalf) || 0,
+        unitType: p.unitType,
+        img: p.img,
+        emoji: p.emoji,
+        tags: typeof p.tags === 'string' ? p.tags.split(',').map(t=>t.trim()).filter(t=>t) : [],
+        hot: p.hot === true || p.hot === 'true' || p.hot === 'TRUE',
+        rating: parseFloat(p.rating) || 4.8,
+        enabled: p.enabled !== false && p.enabled !== 'false' && p.enabled !== 'FALSE'
+      }));
+      safeStorage.setItem("p25_catalog_db", JSON.stringify(MENU));
+      if (typeof filterCat === 'function' && !document.getElementById('catalogGrid')) filterCat(currentCat);
+      if (typeof renderCatalog === 'function') renderCatalog();
+      if (typeof populateEditProductSelect === 'function') populateEditProductSelect();
+    }
+  } catch (e) {
+    console.warn("Fallo carga de catálogo, usando default:", e);
+  }
+}
+
 function init() {
+  loadCatalog();
   filterCat('todos');
   initPromoDots();
   initPromoAutoScroll();
