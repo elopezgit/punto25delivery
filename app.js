@@ -80,8 +80,7 @@ function promoCardCount() {
   const scroll = document.getElementById('promoScroll');
   if (!scroll) return 0;
   const all = scroll.querySelectorAll('.promo-card');
-  // En mobile hay clones (mitad), en desktop no
-  return window.innerWidth < 768 ? all.length / 2 : all.length;
+  return all.length;
 }
 
 // ─── LOCAL STORAGE PERSISTENCE ───
